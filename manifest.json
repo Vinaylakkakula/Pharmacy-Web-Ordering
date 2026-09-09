@@ -1,0 +1,56 @@
+{
+  "name": "Dhanush Medicals - Online Pharmacy Web Ordering",
+  "short_name": "Dhanush Meds",
+  "description": "Order prescription medicines, healthcare essentials, upload doctor prescriptions, and track doorstep delivery in Korutla.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0B1915",
+  "theme_color": "#0D9488",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": [
+    "medical",
+    "shopping",
+    "health"
+  ],
+  "shortcuts": [
+    {
+      "name": "Upload Doctor Prescription",
+      "short_name": "Upload Rx",
+      "description": "Upload a picture of your prescription for instant order verification",
+      "url": "./index.html?action=upload_rx",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Staff & Admin Portal",
+      "short_name": "Admin Portal",
+      "description": "Access orders, banner CRUD, coupons, and medicine management",
+      "url": "./index.html?action=admin_login",
+      "icons": [
+        {
+          "src": "icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}

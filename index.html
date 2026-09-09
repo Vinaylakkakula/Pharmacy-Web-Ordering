@@ -1,0 +1,1269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="docTitle">MediExpress Pharmacy - Online Medical Store & Web-Ordering</title>
+  <meta name="description" content="Buy Medicines, Health Products, Personal Care, Baby Care, Ayurveda and Health Devices online with 2-Hour Express Delivery & Google Apps Script Backend.">
+  <!-- PWA Manifest & Web App Install Tags -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0D9488">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Dhanush Meds">
+  <link rel="apple-touch-icon" href="icon-192.png">
+
+  <!-- Google Fonts & FontAwesome -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css?v=20260910">
+  <script>
+    // Force unregister old service workers and clear caches to ensure fresh files load
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        registrations.forEach(function(registration) {
+          registration.unregister().then(function() {
+            console.log('[SW-FIX] Old Service Worker unregistered');
+          });
+        });
+      });
+      if ('caches' in window) {
+        caches.keys().then(function(names) {
+          names.forEach(function(name) {
+            caches.delete(name);
+            console.log('[SW-FIX] Cache deleted:', name);
+          });
+        });
+      }
+    }
+  </script>
+</head>
+<body>
+
+  <!-- Top Announcement Bar -->
+  <div class="top-bar">
+    <div class="promo-text">
+      <span class="promo-badge">EXPRESS</span>
+      <span id="topBarPromoText">⚡ 2-Hour Express Delivery | Loading active coupons...</span>
+    </div>
+    <div class="top-bar-links">
+      <button id="pwaInstallTopBtn" class="pwa-install-top-btn" onclick="triggerPWAInstall()" style="display:inline-flex;">
+        <i class="fa-solid fa-cloud-arrow-down"></i> Install App
+      </button>
+      <a href="javascript:void(0)" onclick="openSettingsModal(event)"><i class="fa-solid fa-sliders"></i> App & Store Settings</a>
+      <a href="javascript:void(0)" onclick="openLoginModal(event)"><i class="fa-solid fa-user-shield"></i> Staff Portal</a>
+    </div>
+  </div>
+
+  <!-- Header & Brand Bar -->
+  <header class="main-header">
+    <div class="header-container">
+      
+      <!-- Dynamic Editable Brand Logo -->
+      <a href="javascript:void(0)" class="brand-logo" onclick="switchView('storefront')">
+        <div class="brand-icon">
+          <i class="fa-solid fa-prescription-bottle-medical"></i>
+        </div>
+        <div class="brand-title">
+          <span id="headerBrandName" class="main-name">MediExpress</span>
+          <span id="headerBrandSub" class="sub-name">ONLINE PHARMACY WEB ORDERING</span>
+        </div>
+      </a>
+
+      <!-- Delivery Location Selector -->
+      <div class="location-selector" onclick="promptLocationChange()">
+        <i class="fa-solid fa-location-dot"></i>
+        <div style="display:flex; flex-direction:column; text-align:left;">
+          <span style="font-size:0.68rem; color:#a7f3d0; text-transform:uppercase; font-weight:700;">Deliver to Pincode</span>
+          <span id="currentAddressDisplay" style="font-weight:800;">505326 Korutla <i class="fa-solid fa-chevron-down" style="font-size:0.7rem;"></i></span>
+        </div>
+      </div>
+
+      <!-- Search Bar with Live Auto-complete -->
+      <div class="search-wrapper">
+        <div class="search-input-group">
+          <i class="fa-solid fa-magnifying-glass" style="cursor:pointer;" onclick="submitSearchQuery()" title="Click to Search"></i>
+          <input type="text" id="medicineSearchInput" placeholder="Search Medicines, Salt Composition, Daily Health..." autocomplete="off" oninput="handleSearchInput(this.value)">
+        </div>
+        <div id="searchResultsDropdown" class="search-results-dropdown"></div>
+      </div>
+
+      <!-- Header Action Buttons -->
+      <div class="header-actions">
+        <button class="btn-header-action" onclick="openRxUploadModal(event)">
+          <i class="fa-solid fa-file-medical"></i>
+          <span>Upload Rx</span>
+        </button>
+
+        <button class="btn-header-action" onclick="openCartDrawer(event)">
+          <i class="fa-solid fa-cart-shopping"></i>
+          <span>Cart</span>
+          <span id="headerCartBadge" class="cart-btn-badge">0</span>
+        </button>
+
+        <button id="userAuthBtn" class="btn-header-action" onclick="openLoginModal(event)">
+          <i class="fa-solid fa-user-circle"></i>
+          <span id="userAuthText">Login</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- Clean Single Category Filter Strip Navigation -->
+  <div id="storefrontCategoryBar" class="category-subnav">
+    <div id="categoryChipBar" class="category-subnav-container">
+      <!-- Dynamic chips rendered via app.js -->
+    </div>
+  </div>
+
+  <!-- Storefront Main View -->
+  <div id="storefrontView">
+    <main class="main-wrapper">
+
+      <!-- Hero Section & Prescription Upload Card -->
+      <section class="hero-slider-section">
+        <div class="banner-carousel-box" id="heroBannerCarousel">
+          <div class="banner-slide-content">
+            <span class="promo-badge" style="background:#fff; color:var(--pharmacy-emerald-dark); font-weight:800; font-size:0.75rem; padding:4px 12px; border-radius:12px; margin-bottom:10px; display:inline-block;">EXPRESS PHARMACY</span>
+            <h2 id="bannerHeroTitle">Same Salt, Bigger Savings</h2>
+            <p>Quality generic & branded prescription medicines delivered directly to your doorstep with up to 50% savings.</p>
+            <button class="banner-btn" onclick="switchCategoryFilter('Prescription Medicines')">
+              <i class="fa-solid fa-arrow-trend-down"></i> Explore Pharmacy Savings
+            </button>
+          </div>
+          <img src="https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500&auto=format&fit=crop&q=80" alt="Medicine Savings" class="banner-img-decor">
+        </div>
+
+        <!-- Quick Prescription Upload Card -->
+        <div class="rx-upload-quick-card">
+          <div>
+            <div class="rx-card-header">
+              <div class="rx-icon-box"><i class="fa-solid fa-prescription-bottle-medical"></i></div>
+              <div>
+                <div class="rx-card-title">Have a Doctor's Prescription?</div>
+                <div style="font-size:0.78rem; color:#047857; font-weight:700;">Fast 2-hour pharmacist order verification</div>
+              </div>
+            </div>
+            <p class="rx-card-desc">Upload doctor's prescription picture. Our registered pharmacist will review it and fulfill your order automatically.</p>
+          </div>
+          <button class="btn-upload-rx" onclick="openRxUploadModal()">
+            <i class="fa-solid fa-cloud-arrow-up"></i> Upload Rx & Order Medicines
+          </button>
+        </div>
+      </section>
+
+      <!-- Trust Badges Strip -->
+      <section class="trust-badges-strip">
+        <div class="trust-badge-item">
+          <div class="trust-badge-icon"><i class="fa-solid fa-shield-check"></i></div>
+          <div class="trust-badge-text">
+            <h5>100% Genuine Medicines</h5>
+            <p>Sourced directly from certified labs</p>
+          </div>
+        </div>
+        <div class="trust-badge-item">
+          <div class="trust-badge-icon"><i class="fa-solid fa-user-nurse"></i></div>
+          <div class="trust-badge-text">
+            <h5>Verified Pharmacists</h5>
+            <p>Double checked by experts</p>
+          </div>
+        </div>
+        <div class="trust-badge-item">
+          <div class="trust-badge-icon"><i class="fa-solid fa-truck-fast"></i></div>
+          <div class="trust-badge-text">
+            <h5>2-Hour Express Delivery</h5>
+            <p>Fast doorstep delivery</p>
+          </div>
+        </div>
+        <div class="trust-badge-item">
+          <div class="trust-badge-icon"><i class="fa-solid fa-lock"></i></div>
+          <div class="trust-badge-text">
+            <h5>Secure Checkout</h5>
+            <p>COD, UPI & Credit Cards</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Pure Pharmacy Quick Services Grid -->
+      <section class="quick-services-grid">
+        <div class="service-card" onclick="openRxUploadModal()">
+          <div class="service-icon"><i class="fa-solid fa-file-prescription"></i></div>
+          <div class="service-info">
+            <h4>Upload Prescription</h4>
+            <p>Instant pharmacist review</p>
+          </div>
+        </div>
+        <div class="service-card" onclick="openWhatsAppOrder()">
+          <div class="service-icon" style="background:#dcfce7; color:#15803d;"><i class="fa-brands fa-whatsapp"></i></div>
+          <div class="service-info">
+            <h4>WhatsApp Order</h4>
+            <p>Direct chat with pharmacy</p>
+          </div>
+        </div>
+        <div class="service-card" onclick="openServiceInfo('Pharmacist Consultation')">
+          <div class="service-icon" style="background:#e0f2fe; color:#0369a1;"><i class="fa-solid fa-user-nurse"></i></div>
+          <div class="service-info">
+            <h4>Ask Pharmacist</h4>
+            <p>Free dosage advice</p>
+          </div>
+        </div>
+        <div class="service-card" onclick="openServiceInfo('2-Hour Express Delivery')">
+          <div class="service-icon" style="background:#fef3c7; color:#b45309;"><i class="fa-solid fa-bolt"></i></div>
+          <div class="service-info">
+            <h4>Express Delivery</h4>
+            <p>Delivered in 2 hours</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Active Filter Banner (When category selected) -->
+      <div id="activeFilterTitleBar" style="display:none; justify-content:space-between; align-items:center; background:#fff; padding:14px 24px; border-radius:12px; margin-bottom:24px; box-shadow:var(--shadow-sm); border:1px solid var(--pharmacy-border);">
+        <h3 id="activeFilterHeading" style="font-weight:800; color:var(--pharmacy-emerald-dark);">All Healthcare Products</h3>
+        <button class="btn btn-secondary" onclick="switchCategoryFilter('all')"><i class="fa-solid fa-times"></i> Clear Filter</button>
+      </div>
+
+      <!-- Section 1: Value Deals under Rs 100 -->
+      <section id="sectionValueDeals" class="product-section">
+        <div class="section-header">
+          <div class="section-title-group">
+            <h3 class="section-title">Value Deals under ₹100</h3>
+            <span class="section-subtitle">Top essential personal care & daily health items</span>
+          </div>
+          <a class="btn-view-all" onclick="switchCategoryFilter('Personal Care')">View All <i class="fa-solid fa-chevron-right"></i></a>
+        </div>
+        <div id="valueDealsGrid" class="products-grid">
+          <!-- Dynamic Products -->
+        </div>
+      </section>
+
+      <!-- Section 2: Minimum 50 Percent Off -->
+      <section id="sectionFiftyPercent" class="product-section">
+        <div class="section-header">
+          <div class="section-title-group">
+            <h3 class="section-title">Minimum 50 Percent Off</h3>
+            <span class="section-subtitle">Massive savings on leading pharmacy brands</span>
+          </div>
+          <a class="btn-view-all" onclick="switchCategoryFilter('Personal Care')">View All <i class="fa-solid fa-chevron-right"></i></a>
+        </div>
+        <div id="fiftyPercentGrid" class="products-grid">
+          <!-- Dynamic Products -->
+        </div>
+      </section>
+
+      <!-- Section 3: Essential Medicines & Healthcare -->
+      <section id="sectionMedicines" class="product-section">
+        <div class="section-header">
+          <div class="section-title-group">
+            <h3 class="section-title">Essential Medicines & Healthcare</h3>
+            <span class="section-subtitle">Prescription & OTC medicines delivered express</span>
+          </div>
+          <a class="btn-view-all" onclick="switchCategoryFilter('Prescription Medicines')">View All <i class="fa-solid fa-chevron-right"></i></a>
+        </div>
+        <div id="medicinesGrid" class="products-grid">
+          <!-- Dynamic Products -->
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Staff Dashboard View (Admin / Pharmacist / Rider) -->
+  <div id="staffDashboardView" style="display:none;" class="main-wrapper">
+    <div style="display:flex; justify-content:space-between; align-items:center; background:#fff; padding:20px 28px; border-radius:var(--radius-lg); margin-bottom:24px; box-shadow:var(--shadow-sm); border:1px solid var(--pharmacy-border);">
+      <div style="display:flex; align-items:center; gap:16px;">
+        <div id="staffAvatarIcon" style="width:52px; height:52px; background:linear-gradient(135deg, var(--pharmacy-emerald-dark), var(--pharmacy-emerald-main)); color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.5rem; box-shadow:var(--shadow-glow);">
+          <i class="fa-solid fa-user-gear"></i>
+        </div>
+        <div>
+          <h2 id="staffPortalTitle" style="font-size:1.4rem; font-weight:800; color:var(--pharmacy-text-main);">Admin Control Center</h2>
+          <span id="staffRoleBadge" class="status-pill status-verified">Role: Admin</span>
+        </div>
+      </div>
+      <div style="display:flex; gap:12px;">
+        <button class="btn btn-secondary" onclick="switchView('storefront')"><i class="fa-solid fa-store"></i> Back to Store</button>
+        <button class="btn btn-danger" onclick="logoutStaff()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+      </div>
+    </div>
+
+    <!-- Admin Panel Content -->
+    <div id="adminPanelSection">
+      
+      <!-- Stats Overview Header Cards -->
+      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-bottom:24px;">
+        <div style="background:#fff; padding:18px; border-radius:var(--radius-md); box-shadow:var(--shadow-sm); border:1px solid var(--pharmacy-border);">
+          <span style="font-size:0.8rem; color:var(--pharmacy-text-muted); font-weight:700; text-transform:uppercase;">Total Orders</span>
+          <h3 id="statTotalOrders" style="font-size:1.6rem; font-weight:800; color:var(--pharmacy-emerald-dark); margin-top:4px;">0</h3>
+        </div>
+        <div style="background:#fff; padding:18px; border-radius:var(--radius-md); box-shadow:var(--shadow-sm); border:1px solid var(--pharmacy-border);">
+          <span style="font-size:0.8rem; color:var(--pharmacy-text-muted); font-weight:700; text-transform:uppercase;">Revenue</span>
+          <h3 id="statTotalRevenue" style="font-size:1.6rem; font-weight:800; color:#15803d; margin-top:4px;">₹0.00</h3>
+        </div>
+        <div style="background:#fff; padding:18px; border-radius:var(--radius-md); box-shadow:var(--shadow-sm); border:1px solid var(--pharmacy-border);">
+          <span style="font-size:0.8rem; color:var(--pharmacy-text-muted); font-weight:700; text-transform:uppercase;">Pending Rx Queue</span>
+          <h3 id="statPendingRx" style="font-size:1.6rem; font-weight:800; color:#b91c1c; margin-top:4px;">0</h3>
+        </div>
+        <div style="background:#fff; padding:18px; border-radius:var(--radius-md); box-shadow:var(--shadow-sm); border:1px solid var(--pharmacy-border);">
+          <span style="font-size:0.8rem; color:var(--pharmacy-text-muted); font-weight:700; text-transform:uppercase;">Products in Catalog</span>
+          <h3 id="statCatalogCount" style="font-size:1.6rem; font-weight:800; color:var(--pharmacy-teal-accent); margin-top:4px;">0</h3>
+        </div>
+      </div>
+
+      <!-- Styled Admin Tabs Navigation -->
+      <div class="dashboard-tabs">
+        <button class="tab-btn active" onclick="switchAdminTab('medicines', event)"><i class="fa-solid fa-pills"></i> Medicines CRUD</button>
+        <button class="tab-btn" onclick="switchAdminTab('categories', event)"><i class="fa-solid fa-layer-group"></i> Categories CRUD</button>
+        <button class="tab-btn" onclick="switchAdminTab('banners', event)"><i class="fa-solid fa-image"></i> Banners CRUD</button>
+        <button class="tab-btn" onclick="switchAdminTab('coupons', event)"><i class="fa-solid fa-ticket"></i> Coupons & Discounts</button>
+        <button class="tab-btn" onclick="switchAdminTab('orders', event)"><i class="fa-solid fa-boxes-packing"></i> Orders & Dispatch</button>
+        <button class="tab-btn" onclick="switchAdminTab('users', event)"><i class="fa-solid fa-users-gear"></i> Staff Users & Roles</button>
+        <button class="tab-btn" onclick="switchAdminTab('appBranding', event)"><i class="fa-solid fa-sliders"></i> App Name & Branding</button>
+      </div>
+
+      <!-- Medicines CRUD Tab -->
+      <div id="tabMedicinesCrud" class="admin-tab-content">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <h3>Manage Pharmacy Products</h3>
+          <button class="btn btn-primary" onclick="openAddMedicineModal()"><i class="fa-solid fa-plus"></i> Add New Medicine</button>
+        </div>
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Title & Brand</th>
+                <th>Category</th>
+                <th>Price / MRP</th>
+                <th>Rx Needed</th>
+                <th>Stock</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="adminMedicinesTableBody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Categories CRUD Tab -->
+      <div id="tabCategoriesCrud" class="admin-tab-content" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <h3>Pharmacy Departments & Categories</h3>
+          <button class="btn btn-primary" onclick="openAddCategoryModal()"><i class="fa-solid fa-plus"></i> Add Category</button>
+        </div>
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Icon</th>
+                <th>Category Name</th>
+                <th>Description</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="adminCategoriesTableBody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Storefront Hero Banners CRUD Tab -->
+      <div id="tabBannersCrud" class="admin-tab-content" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <div>
+            <h3>🖼️ Storefront Hero Promotional Banners</h3>
+            <p style="font-size:0.85rem; color:var(--pharmacy-text-muted);">Manage hero slider promotional banners, call-to-action buttons, background gradients, and image highlights.</p>
+          </div>
+          <button class="btn btn-primary" onclick="openAddBannerModal()"><i class="fa-solid fa-plus"></i> Add New Banner</button>
+        </div>
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Image Preview</th>
+                <th>Badge & Title</th>
+                <th>Description</th>
+                <th>Button & Action</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="adminBannersTableBody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Coupons & Discount Rules CRUD Tab -->
+      <div id="tabCouponsCrud" class="admin-tab-content" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <div>
+            <h3>🏷️ Coupon & Pricing Discount Rules</h3>
+            <p style="font-size:0.85rem; color:var(--pharmacy-text-muted);">Create percentage (%) or flat amount (₹) discount coupons based on minimum purchase threshold (e.g. Purchase > ₹100, 20% or 50% OFF).</p>
+          </div>
+          <button class="btn btn-primary" onclick="openAddCouponModal()"><i class="fa-solid fa-plus"></i> Create New Coupon</button>
+        </div>
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Coupon Code</th>
+                <th>Offer & Description</th>
+                <th>Discount Structure</th>
+                <th>Min Order Threshold</th>
+                <th>Max Savings Cap</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="adminCouponsTableBody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Orders & Dispatch Tab -->
+      <div id="tabOrdersCrud" class="admin-tab-content" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <h3>Live Orders Management</h3>
+          <span style="font-size:0.85rem; color:var(--pharmacy-text-muted);">Admin email notification is triggered for each new order</span>
+        </div>
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Items & Prescription</th>
+                <th>Total & Coupon</th>
+                <th>Status</th>
+                <th>Assigned Rider</th>
+                <th>Update Status</th>
+              </tr>
+            </thead>
+            <tbody id="adminOrdersTableBody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Staff Users & Role Management Tab -->
+      <div id="tabUsersCrud" class="admin-tab-content" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+          <div>
+            <h3 style="color:var(--pharmacy-emerald-dark);"><i class="fa-solid fa-users-gear"></i> Staff Accounts & Role Assignments</h3>
+            <p style="font-size:0.88rem; color:var(--pharmacy-text-muted);">Create staff accounts, assign roles (Admin, Pharmacist, Rider), and reset passwords.</p>
+          </div>
+          <button class="btn btn-primary" onclick="openAddUserModal()"><i class="fa-solid fa-user-plus"></i> Create New Staff Account</button>
+        </div>
+        <div class="table-responsive">
+          <table class="custom-table">
+            <thead>
+              <tr>
+                <th>Staff Full Name</th>
+                <th>Username</th>
+                <th>Assigned Role</th>
+                <th>Password</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="adminUsersTableBody">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- App Branding & Email Config Tab -->
+      <div id="tabAppBranding" class="admin-tab-content" style="display:none;">
+        <div style="background:#fff; border-radius:var(--radius-lg); padding:28px; box-shadow:var(--shadow-sm); max-width:680px; border:1px solid var(--pharmacy-border);">
+          <h3 style="color:var(--pharmacy-emerald-dark); margin-bottom:10px;"><i class="fa-solid fa-pen-nib"></i> Customize Logo, Color Theme & Branding</h3>
+          <p style="font-size:0.88rem; color:var(--pharmacy-text-muted); margin-bottom:24px;">Change your pharmacy application name, tagline, logo image/icon, color theme preset, and admin email notification settings.</p>
+          
+          <form onsubmit="saveBrandingSettings(event)">
+            <div class="form-row">
+              <div class="form-group">
+                <label>Application / Pharmacy Main Name *</label>
+                <input type="text" id="adminConfigStoreName" class="form-control" value="MediExpress Pharmacy" required placeholder="e.g. MediExpress Pharmacy">
+              </div>
+              <div class="form-group">
+                <label>Pharmacy Subtitle / Tagline *</label>
+                <input type="text" id="adminConfigStoreTagline" class="form-control" value="ONLINE PHARMACY WEB ORDERING" required placeholder="e.g. ONLINE PHARMACY WEB ORDERING">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Pharmacy Logo Icon / Image URL</label>
+                <input type="text" id="adminConfigLogoInput" class="form-control" placeholder="e.g. fa-prescription-bottle-medical or https://..." value="fa-prescription-bottle-medical">
+                <small style="color:var(--pharmacy-text-muted);">Paste a FontAwesome icon name (e.g. fa-capsules, fa-staff-snake) or Image URL.</small>
+              </div>
+              <div class="form-group">
+                <label>Application Color Theme Accent *</label>
+                <select id="adminConfigThemeSelect" class="form-control" onchange="previewThemePreset(this.value)">
+                  <option value="emerald">🟢 Emerald Matcha (Classic Pharmacy Green)</option>
+                  <option value="gold">🟡 Gold Luxe (Luxury Gold & Amber)</option>
+                  <option value="sapphire">🔵 Sapphire Deep (Royal Deep Blue)</option>
+                  <option value="amethyst">🟣 Amethyst Glow (Vibrant Purple Glow)</option>
+                  <option value="ruby">🔴 Ruby Crimson (Ruby Red Accent)</option>
+                  <option value="rose">🌸 Rose Velvet (Rose Velvet Pink)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Admin Notification Email Address *</label>
+                <input type="email" id="adminConfigEmailInput" class="form-control" placeholder="e.g. admin@pharmacy.com" required>
+              </div>
+              <div class="form-group">
+                <label>Enable Instant Admin Email Alerts</label>
+                <select id="adminConfigEmailToggle" class="form-control">
+                  <option value="true">YES - Send Email Alerts via Apps Script</option>
+                  <option value="false">NO - Mute Email Alerts</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Pharmacy WhatsApp Contact Number (for WhatsApp Orders) *</label>
+                <input type="text" id="adminConfigWhatsappInput" class="form-control" placeholder="e.g. 919876543210 (Country Code + Phone)" required value="919876543210">
+                <small style="color:var(--pharmacy-text-muted);">Format: Country Code + Mobile Number (e.g. 919876543210)</small>
+              </div>
+              <div class="form-group">
+                <label>Show Floating Promo Coupon Strip</label>
+                <select id="adminConfigFloatingCouponToggle" class="form-control">
+                  <option value="true">YES - Show Floating Strip at Bottom-Right</option>
+                  <option value="false">NO - Hide Floating Strip on Storefront</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="display:flex; gap:12px; margin-top:20px;">
+              <button type="submit" class="btn btn-primary" style="flex:1;"><i class="fa-solid fa-save"></i> Save Pharmacy Logo, Theme & Branding Settings</button>
+              <button type="button" class="btn btn-secondary" onclick="sendTestAdminEmailAlert()" style="background:#0284c7; color:#fff; border:none;"><i class="fa-solid fa-paper-plane"></i> Send Test Email Alert</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Pharmacist Panel Section -->
+    <div id="pharmacistPanelSection" style="display:none;">
+      <div style="background:#fff; padding:24px; border-radius:var(--radius-lg); margin-bottom:20px; box-shadow:var(--shadow-sm); border:1px solid var(--pharmacy-border);">
+        <h3 style="color:var(--pharmacy-emerald-dark);"><i class="fa-solid fa-user-nurse"></i> Pharmacist Prescription Review Queue</h3>
+        <p style="font-size:0.88rem; color:var(--pharmacy-text-muted);">Verify uploaded doctor prescriptions (Rx) before orders are packed and dispatched to customers.</p>
+      </div>
+      <div class="table-responsive">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer Name</th>
+              <th>Prescription Preview</th>
+              <th>Ordered Medicines</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="pharmacistQueueTableBody">
+            <!-- Rendered via JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Rider Delivery Portal Section -->
+    <div id="riderPanelSection" style="display:none;">
+      <div style="background:linear-gradient(135deg, var(--pharmacy-emerald-dark), var(--pharmacy-emerald-main)); color:#fff; padding:28px; border-radius:var(--radius-lg); margin-bottom:24px; display:flex; justify-content:space-between; align-items:center; box-shadow:var(--shadow-md);">
+        <div>
+          <h2>🛵 Pharmacy Delivery Rider Portal</h2>
+          <p style="color:#a7f3d0; font-size:0.92rem;">Flat Rate Earnings: <strong>$5.00 / Order Delivered</strong></p>
+        </div>
+        <div style="text-align:right;">
+          <span style="font-size:0.82rem; text-transform:uppercase;">Total Rider Earnings</span>
+          <h2 id="riderTotalEarnings" style="color:var(--pharmacy-gold-accent); font-size:2.2rem; font-weight:800;">$0.00</h2>
+        </div>
+      </div>
+
+      <h3 style="margin-bottom:16px;">Assigned Delivery Orders</h3>
+      <div id="riderOrdersGrid" style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:18px;">
+        <!-- Dynamic Rider Cards -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Dedicated Prescription Inspection & Preview Modal (For Pharmacist & Admin) -->
+  <div id="rxPreviewModalOverlay" class="modal-overlay">
+    <div class="modal-box large">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-microscope"></i> Prescription Verification & Inspection</h3>
+        <button class="btn-close-drawer" onclick="closeRxPreviewModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:24px;">
+          
+          <!-- Left Column: Prescription Image / Document Viewer -->
+          <div style="background:#f8fafc; border:2px dashed var(--pharmacy-teal-accent); border-radius:12px; padding:16px; text-align:center; min-height:350px; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+            <div id="rxPreviewImageContainer" style="width:100%; height:100%; display:flex; align-items:center; justify-content:center;">
+              <!-- Prescription Image or Document Preview -->
+            </div>
+          </div>
+
+          <!-- Right Column: Details & Verification Action Controls -->
+          <div style="display:flex; flex-direction:column; justify-content:space-between;">
+            <div>
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                <span id="rxPreviewOrderId" style="font-size:1.1rem; font-weight:800; color:var(--pharmacy-emerald-dark);">#ORD-1001</span>
+                <span id="rxPreviewStatusBadge" class="status-pill status-rx_pending">Pending Review</span>
+              </div>
+
+              <div style="background:#f1f5f9; padding:14px; border-radius:10px; font-size:0.88rem; margin-bottom:16px;">
+                <div><strong>Customer Name:</strong> <span id="rxCustName">Rahul Sharma</span></div>
+                <div><strong>Mobile Contact:</strong> <span id="rxCustPhone">9876543210</span></div>
+                <div><strong>Delivery Address:</strong> <span id="rxCustAddr">123 MG Road, Bangalore</span></div>
+              </div>
+
+              <h4 style="font-weight:800; margin-bottom:8px; color:var(--pharmacy-text-main);">Prescription Notes & Items</h4>
+              <div id="rxPreviewItemList" style="max-height:150px; overflow-y:auto; border:1px solid var(--pharmacy-border); border-radius:8px; padding:10px; margin-bottom:16px;"></div>
+            </div>
+
+            <!-- Action Buttons for Pharmacist / Admin -->
+            <div style="display:flex; flex-direction:column; gap:10px; padding-top:14px; border-top:1px solid var(--pharmacy-border);">
+              <button class="btn btn-primary" style="width:100%; justify-content:center; padding:12px;" onclick="approvePrescriptionAction()">
+                <i class="fa-solid fa-circle-check"></i> Approve Prescription & Send to Packing
+              </button>
+              <button class="btn btn-warning" style="width:100%; justify-content:center; padding:10px;" onclick="dispatchToRiderAction()">
+                <i class="fa-solid fa-motorcycle"></i> Assign Rider for Delivery
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PWA Browser Installation Floating Banner -->
+  <div id="pwaInstallBanner" class="pwa-install-banner" style="display:none;">
+    <div class="pwa-install-icon">
+      <i class="fa-solid fa-mobile-screen-button"></i>
+    </div>
+    <div class="pwa-install-text">
+      <strong>Install Dhanush Meds App</strong>
+      <span>Install app on phone/desktop for 1-click ordering & offline access</span>
+    </div>
+    <div class="pwa-install-actions">
+      <button class="btn btn-sm btn-primary" onclick="triggerPWAInstall()" style="padding:6px 14px; font-weight:700;">Install</button>
+      <button class="btn-close-pwa" onclick="dismissPWABanner()" title="Dismiss">&times;</button>
+    </div>
+  </div>
+
+  <!-- Floating Group: Offer Deal Strip & Quick Rx Upload Widget -->
+  <div class="floating-widgets-group">
+    <div class="floating-rx-widget" onclick="openRxUploadModal()">
+      <i class="fa-solid fa-file-prescription"></i>
+      <span>Quick Rx Upload</span>
+    </div>
+    <div class="floating-offer-strip">
+      <i class="fa-solid fa-ticket-simple"></i>
+      <span id="floatingOfferText" class="floating-offer-text">FLAT ₹200 OFF | Code: WEB200</span>
+      <span id="floatingOfferCodeBtn" class="btn-offer-code" onclick="copyCouponCode('WEB200')">APPLY</span>
+      <span class="btn-close-floating-coupon" onclick="dismissFloatingCoupon(event)" title="Dismiss Coupon Strip">&times;</span>
+    </div>
+  </div>
+
+  <!-- Slide-out Shopping Cart Drawer -->
+  <div id="cartDrawerOverlay" class="cart-drawer-overlay" onclick="closeCartDrawer()"></div>
+  <aside id="cartDrawer" class="cart-drawer">
+    <div class="cart-drawer-header">
+      <h3><i class="fa-solid fa-cart-shopping"></i> Pharmacy Cart (<span id="cartDrawerCount">0</span> items)</h3>
+      <button class="btn-close-drawer" onclick="closeCartDrawer()">&times;</button>
+    </div>
+    <div id="cartDrawerBody" class="cart-drawer-body">
+      <!-- Cart items rendered here -->
+    </div>
+    <div class="cart-drawer-footer">
+      <!-- Promo Coupon Section -->
+      <div class="promo-coupon-section" style="margin-bottom:14px; padding:12px; background:#f0fdf4; border:1px dashed #00897b; border-radius:var(--radius-md);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+          <span style="font-weight:800; font-size:0.82rem; color:var(--pharmacy-emerald-dark);"><i class="fa-solid fa-ticket"></i> Apply Promo Coupon</span>
+          <button class="btn-offer-code" type="button" onclick="toggleAvailableCouponsList()" style="font-size:0.72rem; padding:3px 10px;">Available Offers</button>
+        </div>
+        
+        <div id="availableCouponsList" style="display:none; margin-bottom:10px; max-height:140px; overflow-y:auto;">
+          <!-- Dynamically populated active coupons -->
+        </div>
+
+        <div style="display:flex; gap:8px;">
+          <input type="text" id="cartCouponInput" class="form-control" style="text-transform:uppercase; font-size:0.85rem; font-weight:700; padding:6px 10px; height:36px;" placeholder="ENTER CODE (e.g. HALF50)">
+          <button class="btn btn-primary" type="button" onclick="applyCouponCode()" style="padding:6px 14px; font-size:0.82rem; font-weight:800; white-space:nowrap; height:36px;">Apply</button>
+        </div>
+        <div id="appliedCouponStatus" style="margin-top:6px;"></div>
+      </div>
+
+      <div class="cart-summary-line">
+        <span>Subtotal</span>
+        <span id="cartSubtotalVal">₹0.00</span>
+      </div>
+      <div class="cart-summary-line" id="cartCouponDiscountRow" style="display:none; color:#15803d; font-weight:700;">
+        <span>Coupon Discount (<strong id="appliedCouponCodeTag"></strong>)</span>
+        <span id="cartCouponDiscountVal">-₹0.00</span>
+      </div>
+      <div class="cart-summary-line">
+        <span>Express Delivery</span>
+        <span id="cartDeliveryVal" style="color:var(--pharmacy-emerald-dark); font-weight:800;">FREE</span>
+      </div>
+      <div class="cart-summary-line total">
+        <span>Total Payable</span>
+        <span id="cartTotalVal" style="color:var(--pharmacy-emerald-dark);">₹0.00</span>
+      </div>
+      <button class="btn-checkout" onclick="openCheckoutModal()">
+        <span>Proceed to Checkout</span>
+        <i class="fa-solid fa-arrow-right"></i>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Checkout & Prescription Upload Modal -->
+  <div id="checkoutModalOverlay" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-bag-shopping"></i> Complete Pharmacy Order</h3>
+        <button class="btn-close-drawer" onclick="closeCheckoutModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="checkoutForm" onsubmit="handlePlaceOrder(event)">
+          
+          <h4 style="color:var(--pharmacy-emerald-dark); margin-bottom:14px;"><i class="fa-solid fa-user-location"></i> Customer Delivery Information</h4>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Full Name *</label>
+              <input type="text" id="custName" class="form-control" placeholder="e.g. Rahul Sharma" required>
+            </div>
+            <div class="form-group">
+              <label>Mobile Number *</label>
+              <input type="tel" id="custPhone" class="form-control" placeholder="10-digit mobile number" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Complete Delivery Address *</label>
+            <textarea id="custAddress" class="form-control" rows="2" placeholder="House/Flat No., Building, Street Name, Landmark" required></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Pincode *</label>
+              <input type="text" id="custPincode" class="form-control" value="505326" required>
+            </div>
+            <div class="form-group">
+              <label>Payment Method</label>
+              <select id="custPayment" class="form-control">
+                <option value="Cash on Delivery">Cash on Delivery (COD)</option>
+                <option value="UPI / QR Code">UPI / Instant QR Code</option>
+                <option value="Credit / Debit Card">Credit / Debit Card</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="background:var(--pharmacy-mint-soft); border:1px dashed var(--pharmacy-teal-accent); padding:16px; border-radius:var(--radius-md); margin-top:16px;">
+            <h5 style="color:var(--pharmacy-emerald-dark); display:flex; align-items:center; gap:8px;"><i class="fa-solid fa-file-medical"></i> Doctor's Prescription (Rx) Upload</h5>
+            <p style="font-size:0.8rem; color:var(--pharmacy-text-muted); margin:4px 0 12px 0;">If your order contains Rx-required medicines, attach doctor's prescription file.</p>
+            <input type="file" id="checkoutRxFile" class="form-control" accept="image/*,.pdf" onchange="previewRxFile(this)">
+            <div id="rxPreviewBox" style="margin-top:10px; display:none;">
+              <span class="status-pill status-verified">Rx Attached: <span id="rxFileName">filename.jpg</span></span>
+            </div>
+          </div>
+
+          <div style="margin-top:20px; padding:14px; background:#fff8e1; border-radius:var(--radius-sm); font-size:0.85rem; color:#854d0e; display:flex; align-items:center; gap:12px;">
+            <i class="fa-solid fa-envelope-circle-check" style="font-size:1.5rem;"></i>
+            <span><strong>Admin Notification:</strong> Upon checkout, an instant email alert will be sent to the Pharmacy Admin via Google Apps Script.</span>
+          </div>
+
+          <div class="modal-footer" style="padding-left:0; padding-right:0; margin-top:20px;">
+            <button type="button" class="btn btn-secondary" onclick="closeCheckoutModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-circle-check"></i> Confirm & Place Order</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dedicated Prescription Upload Modal -->
+  <div id="rxUploadModalOverlay" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-file-prescription"></i> Upload Doctor's Prescription</h3>
+        <button class="btn-close-drawer" onclick="closeRxUploadModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.9rem; color:var(--pharmacy-text-muted); margin-bottom:18px;">Upload your prescription picture. Our expert pharmacist will review it, add prescribed medicines, and call you to confirm your order.</p>
+        <form onsubmit="handleDirectRxSubmit(event)">
+          <div class="form-group">
+            <label>Patient Full Name *</label>
+            <input type="text" id="rxPatientName" class="form-control" placeholder="Patient name on prescription" required>
+          </div>
+          <div class="form-group">
+            <label>Contact Phone Number *</label>
+            <input type="tel" id="rxPatientPhone" class="form-control" placeholder="Contact number" required>
+          </div>
+          <div class="form-group">
+            <label>Upload Prescription File (Image/PDF) *</label>
+            <input type="file" id="directRxFileInput" class="form-control" accept="image/*,.pdf" required>
+          </div>
+          <div class="form-group">
+            <label>Notes for Pharmacist</label>
+            <textarea id="rxNotes" class="form-control" rows="2" placeholder="Mention brand preferences or required quantity..."></textarea>
+          </div>
+          <div class="modal-footer" style="padding-left:0; padding-right:0;">
+            <button type="button" class="btn btn-secondary" onclick="closeRxUploadModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i> Submit to Pharmacist</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Order Tracking Slip Modal -->
+  <div id="orderTrackerModalOverlay" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-receipt"></i> Order Tracking Slip - <span id="trackOrderId">#ORD-1001</span></h3>
+        <button class="btn-close-drawer" onclick="closeTrackerModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="timeline-tracker">
+          <div id="stepPlaced" class="timeline-step completed">
+            <div class="step-icon"><i class="fa-solid fa-cart-check"></i></div>
+            <span class="step-label">Placed</span>
+          </div>
+          <div id="stepVerified" class="timeline-step">
+            <div class="step-icon"><i class="fa-solid fa-user-nurse"></i></div>
+            <span class="step-label">Rx Verified</span>
+          </div>
+          <div id="stepPacking" class="timeline-step">
+            <div class="step-icon"><i class="fa-solid fa-box-open"></i></div>
+            <span class="step-label">Packing</span>
+          </div>
+          <div id="stepWay" class="timeline-step">
+            <div class="step-icon"><i class="fa-solid fa-motorcycle"></i></div>
+            <span class="step-label">On The Way</span>
+          </div>
+          <div id="stepDelivered" class="timeline-step">
+            <div class="step-icon"><i class="fa-solid fa-house-chimney-check"></i></div>
+            <span class="step-label">Delivered</span>
+          </div>
+        </div>
+
+        <div style="background:var(--pharmacy-mint-soft); border:1px solid #bbf7d0; border-radius:var(--radius-md); padding:18px; margin-bottom:18px;">
+          <h4 style="color:var(--pharmacy-emerald-dark); font-size:0.98rem; margin-bottom:6px;"><i class="fa-solid fa-truck-ramp-box"></i> Delivery Details</h4>
+          <p id="trackCustDetails" style="font-size:0.88rem; color:var(--pharmacy-text-main);"></p>
+        </div>
+
+        <div style="margin-bottom:18px;">
+          <h5 style="font-size:0.92rem; font-weight:800; margin-bottom:10px;">Ordered Items</h5>
+          <div id="trackItemsList" style="max-height:180px; overflow-y:auto; border:1px solid var(--pharmacy-border); border-radius:var(--radius-sm); padding:12px;"></div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; font-weight:800; font-size:1.15rem; color:var(--pharmacy-emerald-dark);">
+          <span>Total Paid</span>
+          <span id="trackTotalPaid">₹0.00</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="closeTrackerModal()">Close Tracker</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Staff Login Modal -->
+  <div id="loginModalOverlay" class="modal-overlay">
+    <div class="modal-box" style="max-width:440px;">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-user-shield"></i> Staff Portal Login</h3>
+        <button class="btn-close-drawer" onclick="closeLoginModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form onsubmit="handleStaffLogin(event)">
+          <div class="form-group">
+            <label>Username</label>
+            <input type="text" id="loginUsername" class="form-control" placeholder="Enter staff username" required>
+          </div>
+          <div class="form-group">
+            <label>Password</label>
+            <input type="password" id="loginPassword" class="form-control" placeholder="Enter password" required>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; margin-top:14px;"><i class="fa-solid fa-right-to-bracket"></i> Login to Dashboard</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add/Edit Medicine Modal -->
+  <div id="medicineModalOverlay" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="medicineModalTitle"><i class="fa-solid fa-pills"></i> Add Pharmacy Item</h3>
+        <button class="btn-close-drawer" onclick="closeMedicineModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="medicineCrudForm" onsubmit="handleSaveMedicine(event)">
+          <input type="hidden" id="medId">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Medicine / Item Title *</label>
+              <input type="text" id="medTitle" class="form-control" placeholder="e.g. Paracetamol 650mg" required>
+            </div>
+            <div class="form-group">
+              <label>Brand / Manufacturer</label>
+              <input type="text" id="medBrand" class="form-control" placeholder="e.g. Cipla / Sun Pharma / Generic">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Category *</label>
+              <select id="medCategory" class="form-control" required></select>
+            </div>
+            <div class="form-group">
+              <label>Salt / Active Ingredient</label>
+              <input type="text" id="medSalt" class="form-control" placeholder="e.g. Acetaminophen">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Sale Price (₹) *</label>
+              <input type="number" step="0.01" id="medPrice" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label>MRP (₹) *</label>
+              <input type="number" step="0.01" id="medMrp" class="form-control" required>
+            </div>
+            <div class="form-group">
+              <label>Stock Count</label>
+              <input type="number" id="medStock" class="form-control" value="100">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Prescription Needed (Rx)?</label>
+              <select id="medRxRequired" class="form-control">
+                <option value="false">No (OTC Item)</option>
+                <option value="true">Yes (Prescription Required)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Product Image URL / Drive</label>
+              <input type="url" id="medImageUrl" class="form-control" placeholder="https://...">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Description / Dosage Instructions</label>
+            <textarea id="medDesc" class="form-control" rows="2"></textarea>
+          </div>
+          <div class="modal-footer" style="padding-left:0; padding-right:0;">
+            <button type="button" class="btn btn-secondary" onclick="closeMedicineModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Save Product</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add / Edit Banner Modal -->
+  <div id="bannerModalOverlay" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="bannerModalTitle"><i class="fa-solid fa-image"></i> Create Storefront Banner</h3>
+        <button class="btn-close-drawer" onclick="closeBannerModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="bannerForm" onsubmit="handleSaveBanner(event)">
+          <input type="hidden" id="bannerEditId">
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label>Promo Badge / Subtitle Tag *</label>
+              <input type="text" id="bannerTagInput" class="form-control" placeholder="e.g. EXPRESS PHARMACY, LIMITED DEAL" required>
+            </div>
+            <div class="form-group">
+              <label>Banner Main Title *</label>
+              <input type="text" id="bannerTitleInput" class="form-control" placeholder="e.g. Same Salt, Bigger Savings" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Banner Description Text *</label>
+            <textarea id="bannerDescInput" class="form-control" rows="2" placeholder="e.g. Quality generic & branded prescription medicines delivered..." required></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Button Label Text *</label>
+              <input type="text" id="bannerBtnTextInput" class="form-control" placeholder="e.g. Upload Prescription Now" required>
+            </div>
+            <div class="form-group">
+              <label>Button Click Action *</label>
+              <select id="bannerBtnActionSelect" class="form-control">
+                <option value="switchCategoryFilter('Prescription Medicines')">Filter Prescription Medicines</option>
+                <option value="openRxUploadModal()">Open Upload Rx Modal</option>
+                <option value="openCartDrawer()">Open Shopping Cart & Offers</option>
+                <option value="switchCategoryFilter('Personal Care')">Filter Personal Care</option>
+                <option value="switchCategoryFilter('Health Devices')">Filter Health Devices</option>
+                <option value="switchCategoryFilter('Baby Care')">Filter Baby Care</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Banner Image URL</label>
+              <input type="url" id="bannerImageUrlInput" class="form-control" placeholder="https://images.unsplash.com/...">
+            </div>
+            <div class="form-group">
+              <label>Background Theme Preset</label>
+              <select id="bannerGradientSelect" class="form-control">
+                <option value="linear-gradient(135deg, #013728 0%, #004d40 60%, #00695c 100%)">Emerald & Mint Dark (Default)</option>
+                <option value="linear-gradient(135deg, #0f172a 0%, #005641 100%)">Midnight Slate & Emerald</option>
+                <option value="linear-gradient(135deg, #004d40 0%, #00897b 100%)">Teal & Mint Breeze</option>
+                <option value="linear-gradient(135deg, #1e293b 0%, #0f172a 100%)">Dark Charcoal Glass</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Banner Status</label>
+            <select id="bannerStatusSelect" class="form-control">
+              <option value="active">ACTIVE - Displayed on Storefront Slider</option>
+              <option value="inactive">INACTIVE - Hidden</option>
+            </select>
+          </div>
+
+          <div class="modal-footer" style="padding-left:0; padding-right:0;">
+            <button type="button" class="btn btn-secondary" onclick="closeBannerModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Save Storefront Banner</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add / Edit Coupon Modal -->
+  <div id="couponModalOverlay" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="couponModalTitle"><i class="fa-solid fa-ticket"></i> Create Discount Coupon</h3>
+        <button class="btn-close-drawer" onclick="closeCouponModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="couponForm" onsubmit="handleSaveCoupon(event)">
+          <input type="hidden" id="couponEditId">
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label>Coupon Code *</label>
+              <input type="text" id="couponCodeInput" class="form-control" placeholder="e.g. HALF50, SAVE20, WEB200" required style="text-transform:uppercase; font-weight:800;">
+            </div>
+            <div class="form-group">
+              <label>Discount Type *</label>
+              <select id="couponTypeSelect" class="form-control" onchange="toggleDiscountInputs()">
+                <option value="percentage">Percentage Discount (%)</option>
+                <option value="flat">Flat Amount Discount (₹)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label id="couponValueLabel">Discount Percentage (%) *</label>
+              <input type="number" id="couponValueInput" class="form-control" placeholder="e.g. 20 for 20% or 200 for ₹200" min="1" step="0.1" required>
+            </div>
+            <div class="form-group">
+              <label>Min Purchase Order Threshold (₹) *</label>
+              <input type="number" id="couponMinOrderInput" class="form-control" placeholder="e.g. 100 (Order total > ₹100)" min="0" step="1" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Max Discount Limit (₹) <span style="font-size:0.75rem; color:var(--pharmacy-text-muted);">(0 for Unlimited)</span></label>
+              <input type="number" id="couponMaxDiscountInput" class="form-control" placeholder="e.g. 150 (Max savings cap)" min="0" step="1" value="0">
+            </div>
+            <div class="form-group">
+              <label>Status</label>
+              <select id="couponStatusSelect" class="form-control">
+                <option value="active">ACTIVE - Available to Customers</option>
+                <option value="inactive">INACTIVE - Disabled</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Coupon Offer Description *</label>
+            <input type="text" id="couponDescInput" class="form-control" placeholder="e.g. 50% OFF on orders above ₹100 (Max ₹150 OFF)" required>
+          </div>
+
+          <div class="modal-footer" style="padding-left:0; padding-right:0;">
+            <button type="button" class="btn btn-secondary" onclick="closeCouponModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Save Discount Coupon</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Settings & Google Apps Script Modal -->
+  <div id="settingsModalOverlay" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-gear"></i> Application & API Settings</h3>
+        <button class="btn-close-drawer" onclick="closeSettingsModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form onsubmit="handleSaveGlobalSettings(event)">
+          <div class="form-group">
+            <label>Database Mode</label>
+            <select id="configDbMode" class="form-control" onchange="toggleApiUrlInput(this.value)">
+              <option value="mock">Local Mock Sandbox Mode (Browser localStorage)</option>
+              <option value="live">Live Google Sheets & Apps Script Mode</option>
+            </select>
+          </div>
+          <div class="form-group" id="apiUrlGroup" style="display:none;">
+            <label>Google Apps Script Web App Deployment URL</label>
+            <input type="url" id="configApiUrl" class="form-control" placeholder="https://script.google.com/macros/s/.../exec">
+            <small style="color:var(--pharmacy-text-muted);">Paste the Web App Endpoint generated from Google Sheets Apps Script.</small>
+          </div>
+          <div class="modal-footer" style="padding-left:0; padding-right:0;">
+            <button type="button" class="btn btn-secondary" onclick="closeSettingsModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Save Settings</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Staff User Creation & Password Reset Modal -->
+  <div id="userModalOverlay" class="modal-overlay">
+    <div class="modal-box" style="max-width:500px;">
+      <div class="modal-header">
+        <h3 id="userModalTitle"><i class="fa-solid fa-user-plus"></i> Create New Staff Account</h3>
+        <button class="btn-close-drawer" onclick="closeUserModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form onsubmit="handleSaveUser(event)">
+          <input type="hidden" id="userEditUsernameHidden" value="">
+          
+          <div class="form-group">
+            <label>Staff Full Name *</label>
+            <input type="text" id="userFullNameInput" class="form-control" placeholder="e.g. Ramesh Kumar" required>
+          </div>
+          
+          <div class="form-group">
+            <label>Username *</label>
+            <input type="text" id="userUsernameInput" class="form-control" placeholder="e.g. ramesh_rider" required>
+            <small style="color:var(--pharmacy-text-muted);">Used by staff member to login to Staff Portal.</small>
+          </div>
+          
+          <div class="form-group">
+            <label>Assign Portal Role *</label>
+            <select id="userRoleSelect" class="form-control" required>
+              <option value="admin">Admin - Full System Access & Settings</option>
+              <option value="pharmacist">Pharmacist - Inventory & Order Processing</option>
+              <option value="rider">Rider - Delivery Dispatch & Order Fulfillment</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label id="userPasswordLabel">Account Password *</label>
+            <div style="display:flex; gap:8px;">
+              <input type="text" id="userPasswordInput" class="form-control" placeholder="Enter new password" required style="font-family:monospace;">
+              <button type="button" class="btn btn-secondary" onclick="generateRandomStaffPassword()" title="Generate Random Password" style="white-space:nowrap;">
+                <i class="fa-solid fa-key"></i> Generate
+              </button>
+            </div>
+            <small style="color:var(--pharmacy-text-muted);">You can assign or reset password anytime.</small>
+          </div>
+          
+          <div class="modal-footer" style="padding-left:0; padding-right:0; margin-top:20px;">
+            <button type="button" class="btn btn-secondary" onclick="closeUserModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-user-check"></i> Save Staff Account</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- PWA Direct Browser Installation Modal -->
+  <div id="pwaInstallModalOverlay" class="modal-overlay">
+    <div class="modal-box" style="max-width:540px;">
+      <div class="modal-header" style="background:linear-gradient(135deg, var(--pharmacy-emerald-dark), var(--pharmacy-emerald-main)); color:#fff;">
+        <h3><i class="fa-solid fa-cloud-arrow-down"></i> Install Dhanush Meds Application</h3>
+        <button class="btn-close-drawer" onclick="closePWAInstallModal()">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:22px;">
+        <div style="text-align:center; margin-bottom:18px;">
+          <div style="width:64px; height:64px; background:linear-gradient(135deg, var(--pharmacy-teal-accent), var(--pharmacy-emerald-main)); color:#fff; border-radius:16px; display:inline-flex; align-items:center; justify-content:center; font-size:2rem; margin-bottom:10px; box-shadow:var(--shadow-glow);">
+            <i class="fa-solid fa-prescription-bottle-medical"></i>
+          </div>
+          <h4 style="font-weight:800; font-size:1.1rem;">Install Dhanush Medicals App</h4>
+          <p style="font-size:0.84rem; color:var(--pharmacy-text-muted);">Get 1-click home screen access, fast desktop windowing, and 2-Hour Express ordering.</p>
+        </div>
+
+        <div style="background:var(--pharmacy-mint-soft); border:1px solid #bbf7d0; border-radius:12px; padding:14px; margin-bottom:16px;">
+          <h5 style="font-weight:800; color:var(--pharmacy-emerald-dark); margin-bottom:8px;"><i class="fa-solid fa-desktop"></i> Desktop (Chrome / Edge / Brave):</h5>
+          <ol style="font-size:0.84rem; padding-left:20px; line-height:1.6; color:var(--pharmacy-text-main);">
+            <li>Click the <strong>Install Icon</strong> (<i class="fa-solid fa-desktop"></i>) in your browser address bar (top right).</li>
+            <li>OR Click Chrome Menu (<strong>&vellip;</strong>) &rarr; <strong>Save and Share</strong> / <strong>More Tools</strong> &rarr; <strong>Create Shortcut...</strong> / <strong>Install App</strong>.</li>
+            <li>Check <strong>"Open as window"</strong> and click <strong>Install</strong>.</li>
+          </ol>
+        </div>
+
+        <div style="background:#f8fafc; border:1px solid var(--pharmacy-border); border-radius:12px; padding:14px; margin-bottom:16px;">
+          <h5 style="font-weight:800; color:var(--pharmacy-text-main); margin-bottom:8px;"><i class="fa-solid fa-mobile-screen-button"></i> Mobile (Android & iOS Safari):</h5>
+          <ul style="font-size:0.84rem; padding-left:20px; line-height:1.6; color:var(--pharmacy-text-main);">
+            <li><strong>iPhone / iPad (Safari)</strong>: Tap <strong>Share</strong> button (<i class="fa-solid fa-share-nodes"></i>) &rarr; Select <strong>"Add to Home Screen"</strong>.</li>
+            <li><strong>Android (Chrome)</strong>: Tap Menu (<strong>&vellip;</strong>) &rarr; Select <strong>"Install app"</strong> or <strong>"Add to Home screen"</strong>.</li>
+          </ul>
+        </div>
+
+        <div class="modal-footer" style="padding-left:0; padding-right:0; margin-top:16px;">
+          <button type="button" class="btn btn-secondary" onclick="closePWAInstallModal()" style="width:100%; justify-content:center;">Got it!</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Bottom Navigation Bar -->
+  <nav class="mobile-bottom-nav">
+    <a href="javascript:void(0)" class="mobile-nav-item active" onclick="switchView('storefront')">
+      <i class="fa-solid fa-house"></i>
+      <span>Home</span>
+    </a>
+    <a href="javascript:void(0)" class="mobile-nav-item" onclick="openRxUploadModal(event)">
+      <i class="fa-solid fa-file-medical"></i>
+      <span>Upload Rx</span>
+    </a>
+    <a href="javascript:void(0)" class="mobile-nav-item" onclick="openCartDrawer(event)">
+      <i class="fa-solid fa-cart-shopping"></i>
+      <span>Cart</span>
+    </a>
+    <a href="javascript:void(0)" class="mobile-nav-item" onclick="openLoginModal(event)">
+      <i class="fa-solid fa-user-circle"></i>
+      <span>Account</span>
+    </a>
+  </nav>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- JavaScript -->
+  <script src="app.js?v=20260910"></script>
+</body>
+</html>
