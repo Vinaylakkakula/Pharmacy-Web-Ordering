@@ -2446,7 +2446,7 @@ function updateDynamicCouponsUI() {
   if (activeCoupons.length === 0 || isDismissed || !isEnabledByAdmin) {
     if (floatingStrip) floatingStrip.style.display = "none";
     if (topBarPromo && activeCoupons.length === 0) {
-      topBarPromo.innerHTML = "⚡ 2-Hour Express Delivery | Quality Generic & Branded Medicines";
+      topBarPromo.innerHTML = "⚡ Express Delivery | Quality Generic & Branded Medicines";
     }
     return;
   }
@@ -2469,7 +2469,7 @@ function updateDynamicCouponsUI() {
   }
 
   if (topBarPromo) {
-    topBarPromo.innerHTML = `⚡ 2-Hour Express Delivery | Use Code <strong>${currentCoupon.code}</strong> for ${currentCoupon.description}`;
+    topBarPromo.innerHTML = `⚡ Express Delivery | Use Code <strong>${currentCoupon.code}</strong> for ${currentCoupon.description}`;
   }
 }
 
@@ -2801,7 +2801,7 @@ document.addEventListener("DOMContentLoaded", () => {
     } else if (text.includes("ask pharmacist")) {
       card.addEventListener("click", () => openServiceInfo("Pharmacist Consultation"));
     } else if (text.includes("express delivery")) {
-      card.addEventListener("click", () => openServiceInfo("2-Hour Express Delivery"));
+      card.addEventListener("click", () => openServiceInfo("Express Delivery"));
     }
   });
 

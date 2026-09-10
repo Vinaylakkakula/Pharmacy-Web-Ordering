@@ -1713,8 +1713,40 @@ header.main-header {
     font-size: 0.72rem;
   }
 
+  .section-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .section-title-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+  }
   .section-title {
-    font-size: 1.25rem;
+    font-size: 1.15rem;
+    font-weight: 800;
+    line-height: 1.25;
+    color: var(--pharmacy-text-main);
+  }
+  .section-subtitle {
+    font-size: 0.76rem;
+    color: var(--pharmacy-text-muted);
+    line-height: 1.3;
+  }
+  .btn-view-all {
+    white-space: nowrap;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 5px 12px;
+    border-radius: 16px;
+    flex-shrink: 0;
+    margin-top: 2px;
   }
   
   .products-grid {
