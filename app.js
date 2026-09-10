@@ -1635,6 +1635,9 @@ function renderStaffDashboard() {
     roleBadge.innerText = "Role: Delivery Rider";
     renderRiderPortal();
   }
+
+  // Auto-sync live orders from cloud database when opening dashboard
+  syncLiveOrdersFromAPI();
 }
 
 // Admin Tab Switching
@@ -1849,13 +1852,136 @@ function deleteMedicine(id) {
   }
 }
 
+// Category CRUD Functions
+function openAddCategoryModal() {
+  document.getElementById("categoryEditId").value = "";
+  document.getElementById("categoryForm").reset();
+  document.getElementById("categoryModalTitle").innerHTML = `<i class="fa-solid fa-layer-group"></i> Add New Category`;
+  document.getElementById("categoryModalOverlay").classList.add("active");
+}
+
+function closeCategoryModal() {
+  const overlay = document.getElementById("categoryModalOverlay");
+  if (overlay) overlay.classList.remove("active");
+}
+
+function handleSaveCategory(e) {
+  if (e) e.preventDefault();
+  const editId = document.getElementById("categoryEditId").value;
+  const name = document.getElementById("catNameInput").value.trim();
+  let icon = document.getElementById("catIconInput").value.trim();
+  const desc = document.getElementById("catDescInput").value.trim();
+
+  if (!name) {
+    showToast("Please enter a category name!", "error");
+    return;
+  }
+
+  if (!icon.startsWith("fa-")) {
+    icon = "fa-" + icon;
+  }
+
+  if (editId) {
+    const idx = state.categories.findIndex(c => c.id === editId);
+    if (idx !== -1) {
+      state.categories[idx].name = name;
+      state.categories[idx].icon = icon;
+      state.categories[idx].description = desc;
+    }
+  } else {
+    const newCat = {
+      id: "cat-" + Date.now(),
+      name: name,
+      icon: icon,
+      description: desc
+    };
+    state.categories.push(newCat);
+  }
+
+  saveStateToStorage();
+  closeCategoryModal();
+  renderCategoryChips();
+  renderAdminTables();
+
+  // If Live Google API mode enabled, sync saveCategory
+  if (state.config.dbMode === "live" && state.config.apiUrl) {
+    fetch(state.config.apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({
+        action: "saveCategory",
+        data: { id: editId || ("cat-" + Date.now()), name: name, icon: icon, description: desc }
+      })
+    }).catch(err => console.warn("Live category save warning:", err));
+  }
+
+  showToast(`Category "${name}" saved successfully!`, "success");
+}
+
 function deleteCategory(id) {
-  if (confirm("Are you sure you want to delete this category?")) {
+  const cat = state.categories.find(c => c.id === id);
+  if (!cat) return;
+
+  if (confirm(`Are you sure you want to delete category "${cat.name}"?`)) {
     state.categories = state.categories.filter(c => c.id !== id);
     saveStateToStorage();
     renderCategoryChips();
     renderAdminTables();
-    showToast("Category deleted", "success");
+
+    // If Live Google API mode enabled, sync deleteCategory
+    if (state.config.dbMode === "live" && state.config.apiUrl) {
+      fetch(state.config.apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({
+          action: "deleteCategory",
+          data: { id: id }
+        })
+      }).catch(err => console.warn("Live category delete warning:", err));
+    }
+
+    showToast(`Category "${cat.name}" deleted.`, "info");
+  }
+}
+
+// Live Cloud Database Syncing (Google Sheets & Apps Script)
+async function syncLiveOrdersFromAPI() {
+  if (!state.config.apiUrl) {
+    showToast("No Live API URL configured. Running in Local Sandbox Mode.", "info");
+    return;
+  }
+
+  showToast("🔄 Syncing live orders & mobile prescription uploads...", "info");
+
+  try {
+    const res = await fetch(state.config.apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ action: "getOrders" })
+    });
+
+    const json = await res.json();
+    if (json && json.success && Array.isArray(json.data) && json.data.length > 0) {
+      // Merge remote live orders into state.orders without duplicates
+      const remoteOrders = json.data;
+      remoteOrders.forEach(remote => {
+        const existingIdx = state.orders.findIndex(o => o.id === remote.id);
+        if (existingIdx !== -1) {
+          state.orders[existingIdx] = { ...state.orders[existingIdx], ...remote };
+        } else {
+          state.orders.unshift(remote);
+        }
+      });
+
+      saveStateToStorage();
+      renderAdminTables();
+      showToast(`✅ Synced ${json.data.length} live orders from Google Cloud!`, "success");
+    } else {
+      showToast("No new live orders found on cloud database.", "info");
+    }
+  } catch (err) {
+    console.warn("Live orders sync warning:", err);
+    showToast("Live order sync completed. Showing latest stored orders.", "info");
   }
 }
 

@@ -494,9 +494,12 @@
 
       <!-- Orders & Dispatch Tab -->
       <div id="tabOrdersCrud" class="admin-tab-content" style="display:none;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-          <h3>Live Orders Management</h3>
-          <span style="font-size:0.85rem; color:var(--pharmacy-text-muted);">Admin email notification is triggered for each new order</span>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+          <div>
+            <h3>Live Orders Management</h3>
+            <span style="font-size:0.85rem; color:var(--pharmacy-text-muted);">Instant email notifications & live cloud database sync</span>
+          </div>
+          <button class="btn btn-primary" onclick="syncLiveOrdersFromAPI()"><i class="fa-solid fa-rotate"></i> Sync Live Orders & Prescriptions</button>
         </div>
         <div class="table-responsive">
           <table class="custom-table">
@@ -1113,6 +1116,42 @@
           <div class="modal-footer" style="padding-left:0; padding-right:0;">
             <button type="button" class="btn btn-secondary" onclick="closeBannerModal()">Cancel</button>
             <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Save Storefront Banner</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add / Edit Category Modal -->
+  <div id="categoryModalOverlay" class="modal-overlay">
+    <div class="modal-box" style="max-width:500px;">
+      <div class="modal-header">
+        <h3 id="categoryModalTitle"><i class="fa-solid fa-layer-group"></i> Add New Category</h3>
+        <button class="btn-close-drawer" onclick="closeCategoryModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="categoryForm" onsubmit="handleSaveCategory(event)">
+          <input type="hidden" id="categoryEditId">
+          
+          <div class="form-group">
+            <label>Category Name *</label>
+            <input type="text" id="catNameInput" class="form-control" placeholder="e.g. Baby Care, Personal Care, Eye Care" required>
+          </div>
+
+          <div class="form-group">
+            <label>FontAwesome Icon Class *</label>
+            <input type="text" id="catIconInput" class="form-control" placeholder="e.g. fa-baby, fa-pills, fa-leaf, fa-eye" value="fa-pills" required>
+            <small style="color:var(--pharmacy-text-muted);">Icon name from FontAwesome icons (e.g. fa-baby, fa-pump-soap, fa-pills).</small>
+          </div>
+
+          <div class="form-group">
+            <label>Category Description *</label>
+            <input type="text" id="catDescInput" class="form-control" placeholder="e.g. Diapers, baby wipes, and skincare essentials" required>
+          </div>
+
+          <div class="modal-footer" style="padding-left:0; padding-right:0; margin-top:20px;">
+            <button type="button" class="btn btn-secondary" onclick="closeCategoryModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Save Category</button>
           </div>
         </form>
       </div>
