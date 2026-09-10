@@ -320,55 +320,70 @@
   </div>
 
   <!-- Staff Dashboard View (Admin / Pharmacist / Rider) -->
-  <div id="staffDashboardView" style="display:none;" class="main-wrapper">
-    <div style="display:flex; justify-content:space-between; align-items:center; background:#fff; padding:20px 28px; border-radius:var(--radius-lg); margin-bottom:24px; box-shadow:var(--shadow-sm); border:1px solid var(--pharmacy-border);">
-      <div style="display:flex; align-items:center; gap:16px;">
-        <div id="staffAvatarIcon" style="width:52px; height:52px; background:linear-gradient(135deg, var(--pharmacy-emerald-dark), var(--pharmacy-emerald-main)); color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.5rem; box-shadow:var(--shadow-glow);">
+  <div id="staffDashboardView" style="display:none;" class="main-wrapper admin-dashboard-container">
+    <div class="admin-header-card">
+      <div class="admin-header-user-info">
+        <div id="staffAvatarIcon" class="admin-avatar-box">
           <i class="fa-solid fa-user-gear"></i>
         </div>
-        <div>
-          <h2 id="staffPortalTitle" style="font-size:1.4rem; font-weight:800; color:var(--pharmacy-text-main);">Admin Control Center</h2>
+        <div class="admin-title-meta">
+          <h2 id="staffPortalTitle">Admin Control Center</h2>
           <span id="staffRoleBadge" class="status-pill status-verified">Role: Admin</span>
         </div>
       </div>
-      <div style="display:flex; gap:12px;">
-        <button class="btn btn-secondary" onclick="switchView('storefront')"><i class="fa-solid fa-store"></i> Back to Store</button>
-        <button class="btn btn-danger" onclick="logoutStaff()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+      <div class="admin-header-actions-row">
+        <button class="btn btn-secondary btn-storefront-return" onclick="switchView('storefront')"><i class="fa-solid fa-store"></i> Back to Store</button>
+        <button class="btn btn-danger btn-admin-logout" onclick="logoutStaff()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
       </div>
     </div>
 
     <!-- Admin Panel Content -->
     <div id="adminPanelSection">
       
-      <!-- Stats Overview Header Cards -->
-      <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:16px; margin-bottom:24px;">
-        <div style="background:#fff; padding:18px; border-radius:var(--radius-md); box-shadow:var(--shadow-sm); border:1px solid var(--pharmacy-border);">
-          <span style="font-size:0.8rem; color:var(--pharmacy-text-muted); font-weight:700; text-transform:uppercase;">Total Orders</span>
-          <h3 id="statTotalOrders" style="font-size:1.6rem; font-weight:800; color:var(--pharmacy-emerald-dark); margin-top:4px;">0</h3>
+      <!-- Stats Overview Header Cards (2x2 Grid on Mobile) -->
+      <div class="admin-stats-grid">
+        <div class="admin-stat-card">
+          <div class="stat-card-header">
+            <span class="stat-card-title">Total Orders</span>
+            <div class="stat-card-icon icon-orders"><i class="fa-solid fa-boxes-packing"></i></div>
+          </div>
+          <h3 id="statTotalOrders" class="stat-card-value">0</h3>
         </div>
-        <div style="background:#fff; padding:18px; border-radius:var(--radius-md); box-shadow:var(--shadow-sm); border:1px solid var(--pharmacy-border);">
-          <span style="font-size:0.8rem; color:var(--pharmacy-text-muted); font-weight:700; text-transform:uppercase;">Revenue</span>
-          <h3 id="statTotalRevenue" style="font-size:1.6rem; font-weight:800; color:#15803d; margin-top:4px;">₹0.00</h3>
+
+        <div class="admin-stat-card">
+          <div class="stat-card-header">
+            <span class="stat-card-title">Revenue</span>
+            <div class="stat-card-icon icon-revenue"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+          </div>
+          <h3 id="statTotalRevenue" class="stat-card-value text-green">₹0.00</h3>
         </div>
-        <div style="background:#fff; padding:18px; border-radius:var(--radius-md); box-shadow:var(--shadow-sm); border:1px solid var(--pharmacy-border);">
-          <span style="font-size:0.8rem; color:var(--pharmacy-text-muted); font-weight:700; text-transform:uppercase;">Pending Rx Queue</span>
-          <h3 id="statPendingRx" style="font-size:1.6rem; font-weight:800; color:#b91c1c; margin-top:4px;">0</h3>
+
+        <div class="admin-stat-card">
+          <div class="stat-card-header">
+            <span class="stat-card-title">Pending Rx Queue</span>
+            <div class="stat-card-icon icon-rx"><i class="fa-solid fa-file-prescription"></i></div>
+          </div>
+          <h3 id="statPendingRx" class="stat-card-value text-red">0</h3>
         </div>
-        <div style="background:#fff; padding:18px; border-radius:var(--radius-md); box-shadow:var(--shadow-sm); border:1px solid var(--pharmacy-border);">
-          <span style="font-size:0.8rem; color:var(--pharmacy-text-muted); font-weight:700; text-transform:uppercase;">Products in Catalog</span>
-          <h3 id="statCatalogCount" style="font-size:1.6rem; font-weight:800; color:var(--pharmacy-teal-accent); margin-top:4px;">0</h3>
+
+        <div class="admin-stat-card">
+          <div class="stat-card-header">
+            <span class="stat-card-title">Catalog Items</span>
+            <div class="stat-card-icon icon-catalog"><i class="fa-solid fa-pills"></i></div>
+          </div>
+          <h3 id="statCatalogCount" class="stat-card-value text-teal">0</h3>
         </div>
       </div>
 
       <!-- Styled Admin Tabs Navigation -->
       <div class="dashboard-tabs">
-        <button class="tab-btn active" onclick="switchAdminTab('medicines', event)"><i class="fa-solid fa-pills"></i> Medicines CRUD</button>
-        <button class="tab-btn" onclick="switchAdminTab('categories', event)"><i class="fa-solid fa-layer-group"></i> Categories CRUD</button>
-        <button class="tab-btn" onclick="switchAdminTab('banners', event)"><i class="fa-solid fa-image"></i> Banners CRUD</button>
-        <button class="tab-btn" onclick="switchAdminTab('coupons', event)"><i class="fa-solid fa-ticket"></i> Coupons & Discounts</button>
-        <button class="tab-btn" onclick="switchAdminTab('orders', event)"><i class="fa-solid fa-boxes-packing"></i> Orders & Dispatch</button>
-        <button class="tab-btn" onclick="switchAdminTab('users', event)"><i class="fa-solid fa-users-gear"></i> Staff Users & Roles</button>
-        <button class="tab-btn" onclick="switchAdminTab('appBranding', event)"><i class="fa-solid fa-sliders"></i> App Name & Branding</button>
+        <button class="tab-btn active" onclick="switchAdminTab('medicines', event)"><i class="fa-solid fa-pills"></i> Medicines</button>
+        <button class="tab-btn" onclick="switchAdminTab('categories', event)"><i class="fa-solid fa-layer-group"></i> Categories</button>
+        <button class="tab-btn" onclick="switchAdminTab('banners', event)"><i class="fa-solid fa-image"></i> Banners</button>
+        <button class="tab-btn" onclick="switchAdminTab('coupons', event)"><i class="fa-solid fa-ticket"></i> Coupons</button>
+        <button class="tab-btn" onclick="switchAdminTab('orders', event)"><i class="fa-solid fa-boxes-packing"></i> Orders</button>
+        <button class="tab-btn" onclick="switchAdminTab('users', event)"><i class="fa-solid fa-users-gear"></i> Staff Users</button>
+        <button class="tab-btn" onclick="switchAdminTab('appBranding', event)"><i class="fa-solid fa-sliders"></i> Branding</button>
       </div>
 
       <!-- Medicines CRUD Tab -->

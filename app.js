@@ -1547,14 +1547,20 @@ function switchView(viewName) {
   const storefront = document.getElementById("storefrontView");
   const categoryBar = document.getElementById("storefrontCategoryBar");
   const dashboard = document.getElementById("staffDashboardView");
+  const topBar = document.querySelector(".top-bar");
+  const mainHeader = document.querySelector("header.main-header");
 
   if (viewName === 'storefront') {
     if (storefront) storefront.style.display = 'block';
     if (categoryBar) categoryBar.style.display = 'block';
+    if (topBar) topBar.style.display = 'flex';
+    if (mainHeader) mainHeader.style.display = 'block';
     if (dashboard) dashboard.style.display = 'none';
   } else {
     if (storefront) storefront.style.display = 'none';
     if (categoryBar) categoryBar.style.display = 'none';
+    if (topBar) topBar.style.display = 'none';
+    if (mainHeader) mainHeader.style.display = 'none';
     if (dashboard) dashboard.style.display = 'block';
   }
 }
