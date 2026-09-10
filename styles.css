@@ -1915,5 +1915,424 @@ header.main-header {
   }
 }
 
+/* -------------------------------------------------------------
+   APOLLO PHARMACY CATEGORY PAGE & MOBILE PRODUCT CARDS
+ ------------------------------------------------------------- */
+.category-page-wrapper {
+  padding: 16px 0;
+}
+
+.cat-breadcrumb-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--pharmacy-text-muted);
+  margin-bottom: 12px;
+}
+
+.cat-breadcrumb-nav a {
+  color: var(--pharmacy-emerald-main);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.cat-breadcrumb-nav .breadcrumb-sep {
+  font-size: 0.65rem;
+  color: #cbd5e1;
+}
+
+.cat-header-title-row {
+  margin-bottom: 14px;
+}
+
+.cat-main-heading {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--pharmacy-text-main);
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.cat-total-count {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--pharmacy-text-muted);
+}
+
+.cat-toolbar-strip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--pharmacy-border);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 16px;
+  gap: 12px;
+}
+
+.cat-toolbar-left, .cat-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cat-tool-btn {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.82rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: var(--transition);
+}
+
+.cat-tool-btn:hover, .cat-tool-btn.active-tool {
+  border-color: var(--pharmacy-emerald-main);
+  color: var(--pharmacy-emerald-main);
+}
+
+.sort-select-input {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.82rem;
+  cursor: pointer;
+  outline: none;
+}
+
+.active-filter-pills-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.active-pill {
+  background: #e0f2f1;
+  color: var(--pharmacy-emerald-dark);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.active-pill i {
+  cursor: pointer;
+  color: #ef4444;
+}
+
+.clear-all-pills {
+  font-size: 0.76rem;
+  color: #ef4444;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: underline;
+  margin-left: 4px;
+}
+
+/* Apollo Product Grid */
+.apollo-products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 16px;
+}
+
+.apollo-products-list-view {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.apollo-products-list-view .apollo-product-card {
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+}
+
+.apollo-products-list-view .apollo-img-box {
+  width: 120px;
+  height: 120px;
+  margin-bottom: 0;
+  flex-shrink: 0;
+}
+
+/* Apollo Product Card (Clean 2-Column Mobile Friendly Design) */
+.apollo-product-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+}
+
+.apollo-product-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  border-color: #cbd5e1;
+}
+
+/* Light Off-White Image Container with Rounded Corners */
+.apollo-img-box {
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 12px;
+  height: 155px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.apollo-img-box img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+}
+
+.apollo-product-card:hover .apollo-img-box img {
+  transform: scale(1.05);
+}
+
+/* Discount Badge top-left inside Image Box */
+.apollo-badge-discount {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: #fff8e1;
+  color: #b45309;
+  border: 1px solid #fde68a;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 6px;
+  z-index: 2;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+
+.apollo-badge-rx {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 3px 8px;
+  border-radius: 6px;
+  z-index: 2;
+}
+
+/* Add Button in Bottom-Right Corner of Image Frame (Apollo Pharmacy style) */
+.apollo-action-slot {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  z-index: 5;
+}
+
+.apollo-btn-add {
+  background: #ffffff;
+  color: var(--pharmacy-emerald-main);
+  border: 1.5px solid var(--pharmacy-emerald-main);
+  font-weight: 800;
+  border-radius: 8px;
+  font-size: 0.84rem;
+  padding: 5px 18px;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: all 0.2s ease;
+}
+
+.apollo-btn-add:hover {
+  background: var(--pharmacy-emerald-main);
+  color: #ffffff;
+  transform: scale(1.04);
+}
+
+.apollo-qty-stepper {
+  background: var(--pharmacy-emerald-main);
+  color: #ffffff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  padding: 2px 4px;
+  box-shadow: 0 2px 8px rgba(0, 86, 65, 0.3);
+}
+
+.apollo-stepper-btn {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  width: 24px;
+  height: 24px;
+  font-weight: 800;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.apollo-stepper-val {
+  font-weight: 800;
+  font-size: 0.84rem;
+  padding: 0 6px;
+  color: #ffffff;
+}
+
+/* Product Card Information below Image Frame */
+.apollo-card-details {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.apollo-tags-container {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+
+.apollo-tag-chip {
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.apollo-tag-chip.brand-chip {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.apollo-product-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.35;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  height: 2.7em;
+  margin-bottom: 4px;
+}
+
+.apollo-product-sub {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-bottom: 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.apollo-price-section {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.apollo-mrp-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.74rem;
+}
+
+.apollo-mrp-text {
+  text-decoration: line-through;
+  color: #94a3b8;
+}
+
+.apollo-disc-green {
+  color: #16a34a;
+  font-weight: 800;
+}
+
+.apollo-main-price-row {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.apollo-final-price {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.apollo-unit-cost {
+  font-size: 0.72rem;
+  color: #64748b;
+}
+
+.apollo-empty-state {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 40px 20px;
+  background: #ffffff;
+  border-radius: 16px;
+  border: 1px solid var(--pharmacy-border);
+}
+
+/* Mobile Media Queries for Apollo Product Cards */
+@media (max-width: 768px) {
+  .apollo-products-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .apollo-product-card {
+    padding: 8px;
+  }
+  .apollo-img-box {
+    height: 135px;
+    margin-bottom: 8px;
+  }
+  .apollo-btn-add {
+    padding: 4px 14px;
+    font-size: 0.8rem;
+  }
+  .apollo-product-title {
+    font-size: 0.82rem;
+    height: 2.6em;
+  }
+  .apollo-final-price {
+    font-size: 0.96rem;
+  }
+  .cat-main-heading {
+    font-size: 1.2rem;
+  }
+}
+
+
 
 

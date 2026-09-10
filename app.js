@@ -371,6 +371,9 @@ let state = {
   currentUser: null,
   activeCategoryFilter: "all",
   searchQuery: "",
+  sortBy: "relevance",
+  viewLayout: "grid",
+  filters: { rx: "all", discount: 0, price: "all" },
   attachedRxData: null,
   attachedRxName: "",
   activeInspectedOrderId: null,
@@ -614,47 +617,295 @@ function switchCategoryFilter(categoryName) {
   renderCategoryChips();
   renderProducts();
 
-  const titleBar = document.getElementById("activeFilterTitleBar");
-  const heading = document.getElementById("activeFilterHeading");
-
   if (categoryName !== 'all') {
-    if (titleBar) titleBar.style.display = 'flex';
-    if (heading) heading.innerText = categoryName;
-  } else {
-    if (titleBar) titleBar.style.display = 'none';
+    const catListing = document.getElementById("categoryListingSection");
+    if (catListing) {
+      catListing.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
   }
+}
+
+function toggleCategoryLayout() {
+  state.viewLayout = state.viewLayout === 'grid' ? 'list' : 'grid';
+  const icon = document.getElementById("layoutToggleIcon");
+  const btn = document.getElementById("btnLayoutToggle");
+  if (icon) {
+    icon.className = state.viewLayout === 'grid' ? 'fa-solid fa-border-all' : 'fa-solid fa-list';
+  }
+  if (btn) {
+    btn.title = state.viewLayout === 'grid' ? 'Switch to List View' : 'Switch to Grid View';
+  }
+  renderProducts();
+}
+
+function handleSortChange(sortVal) {
+  state.sortBy = sortVal;
+  renderProducts();
+}
+
+function openCategoryFilterModal() {
+  const overlay = document.getElementById("categoryFilterModalOverlay");
+  if (overlay) overlay.classList.add("active");
+  const rxSelect = document.getElementById("filterRxSelect");
+  const discSelect = document.getElementById("filterDiscountSelect");
+  const priceSelect = document.getElementById("filterPriceSelect");
+  if (rxSelect) rxSelect.value = state.filters.rx;
+  if (discSelect) discSelect.value = state.filters.discount;
+  if (priceSelect) priceSelect.value = state.filters.price;
+}
+
+function closeCategoryFilterModal() {
+  const overlay = document.getElementById("categoryFilterModalOverlay");
+  if (overlay) overlay.classList.remove("active");
+}
+
+function applyCategoryFilters(e) {
+  if (e) e.preventDefault();
+  const rxVal = document.getElementById("filterRxSelect").value;
+  const discVal = Number(document.getElementById("filterDiscountSelect").value);
+  const priceVal = document.getElementById("filterPriceSelect").value;
+
+  state.filters = { rx: rxVal, discount: discVal, price: priceVal };
+  closeCategoryFilterModal();
+  renderProducts();
+  showToast("Filters applied", "info");
+}
+
+function resetCategoryFilters() {
+  state.filters = { rx: "all", discount: 0, price: "all" };
+  const rxSelect = document.getElementById("filterRxSelect");
+  const discSelect = document.getElementById("filterDiscountSelect");
+  const priceSelect = document.getElementById("filterPriceSelect");
+  if (rxSelect) rxSelect.value = "all";
+  if (discSelect) discSelect.value = "0";
+  if (priceSelect) priceSelect.value = "all";
+  closeCategoryFilterModal();
+  renderProducts();
+  showToast("Filters reset", "info");
 }
 
 // Render Products Grid & Live Search Filtering
 function renderProducts() {
-  let filtered = state.medicines;
+  const heroSec = document.querySelector(".hero-slider-section");
+  const trustSec = document.querySelector(".trust-badges-strip");
+  const quickSec = document.querySelector(".quick-services-grid");
+  const secValue = document.getElementById("sectionValueDeals");
+  const secFifty = document.getElementById("sectionFiftyPercent");
+  const secMeds = document.getElementById("sectionMedicines");
+  const categoryListing = document.getElementById("categoryListingSection");
 
-  // Search Query Live Filter
-  if (state.searchQuery && state.searchQuery.trim().length > 0) {
-    const q = state.searchQuery.toLowerCase().trim();
-    filtered = state.medicines.filter(m => 
-      m.title.toLowerCase().includes(q) || 
-      (m.salt && m.salt.toLowerCase().includes(q)) || 
-      (m.brand && m.brand.toLowerCase().includes(q)) ||
-      m.category.toLowerCase().includes(q)
-    );
+  const isFilteredView = (state.activeCategoryFilter !== 'all') || (state.searchQuery && state.searchQuery.trim().length > 0);
 
-    const titleBar = document.getElementById("activeFilterTitleBar");
-    const heading = document.getElementById("activeFilterHeading");
-    if (titleBar) titleBar.style.display = 'flex';
-    if (heading) heading.innerText = `Search Results for "${state.searchQuery}" (${filtered.length} items found)`;
-  } else if (state.activeCategoryFilter !== 'all') {
-    filtered = state.medicines.filter(m => m.category === state.activeCategoryFilter);
+  if (isFilteredView) {
+    // Hide Home view clutter
+    if (heroSec) heroSec.style.display = 'none';
+    if (trustSec) trustSec.style.display = 'none';
+    if (quickSec) quickSec.style.display = 'none';
+    if (secValue) secValue.style.display = 'none';
+    if (secFifty) secFifty.style.display = 'none';
+    if (secMeds) secMeds.style.display = 'none';
+    if (categoryListing) categoryListing.style.display = 'block';
+
+    // Update Header & Breadcrumbs
+    const catBreadcrumb = document.getElementById("categoryBreadcrumbActive");
+    const catTitle = document.getElementById("categoryTitleName");
+
+    if (state.searchQuery) {
+      if (catBreadcrumb) catBreadcrumb.innerText = `Search: "${state.searchQuery}"`;
+      if (catTitle) catTitle.innerText = `Search Results`;
+    } else {
+      if (catBreadcrumb) catBreadcrumb.innerText = state.activeCategoryFilter;
+      if (catTitle) catTitle.innerText = state.activeCategoryFilter;
+    }
+
+    // Filter Products
+    let filtered = state.medicines;
+    if (state.searchQuery && state.searchQuery.trim().length > 0) {
+      const q = state.searchQuery.toLowerCase().trim();
+      filtered = filtered.filter(m => 
+        m.title.toLowerCase().includes(q) || 
+        (m.salt && m.salt.toLowerCase().includes(q)) || 
+        (m.brand && m.brand.toLowerCase().includes(q)) ||
+        m.category.toLowerCase().includes(q)
+      );
+    } else if (state.activeCategoryFilter !== 'all') {
+      filtered = filtered.filter(m => m.category === state.activeCategoryFilter);
+    }
+
+    // Apply Filter Options
+    if (state.filters.rx === 'otc') {
+      filtered = filtered.filter(m => !m.rxRequired);
+    } else if (state.filters.rx === 'rx') {
+      filtered = filtered.filter(m => m.rxRequired);
+    }
+
+    if (state.filters.discount > 0) {
+      filtered = filtered.filter(m => {
+        const pct = m.mrp ? Math.round(((m.mrp - m.price) / m.mrp) * 100) : 0;
+        return pct >= state.filters.discount;
+      });
+    }
+
+    if (state.filters.price !== 'all') {
+      const maxPrice = Number(state.filters.price);
+      filtered = filtered.filter(m => m.price <= maxPrice);
+    }
+
+    // Apply Sorting
+    if (state.sortBy === 'price-low') {
+      filtered.sort((a, b) => a.price - b.price);
+    } else if (state.sortBy === 'price-high') {
+      filtered.sort((a, b) => b.price - a.price);
+    } else if (state.sortBy === 'discount') {
+      filtered.sort((a, b) => {
+        const pctA = a.mrp ? Math.round(((a.mrp - a.price) / a.mrp) * 100) : 0;
+        const pctB = b.mrp ? Math.round(((b.mrp - b.price) / b.mrp) * 100) : 0;
+        return pctB - pctA;
+      });
+    } else if (state.sortBy === 'name') {
+      filtered.sort((a, b) => a.title.localeCompare(b.title));
+    }
+
+    const totalCountEl = document.getElementById("categoryTotalCount");
+    if (totalCountEl) totalCountEl.innerText = `- Total Items (${filtered.length})`;
+
+    // Update Active Filter Pills Bar
+    const pillsBar = document.getElementById("categoryActiveFilterPills");
+    if (pillsBar) {
+      let activePillsHtml = '';
+      if (state.filters.rx !== 'all') {
+        activePillsHtml += `<span class="active-pill">${state.filters.rx === 'rx' ? 'Rx Only' : 'OTC Only'} <i class="fa-solid fa-times" onclick="state.filters.rx='all'; renderProducts();"></i></span>`;
+      }
+      if (state.filters.discount > 0) {
+        activePillsHtml += `<span class="active-pill">${state.filters.discount}%+ OFF <i class="fa-solid fa-times" onclick="state.filters.discount=0; renderProducts();"></i></span>`;
+      }
+      if (state.filters.price !== 'all') {
+        activePillsHtml += `<span class="active-pill">Under ₹${state.filters.price} <i class="fa-solid fa-times" onclick="state.filters.price='all'; renderProducts();"></i></span>`;
+      }
+
+      if (activePillsHtml) {
+        pillsBar.style.display = 'flex';
+        pillsBar.innerHTML = activePillsHtml + `<span class="clear-all-pills" onclick="resetCategoryFilters()">Clear All</span>`;
+      } else {
+        pillsBar.style.display = 'none';
+      }
+    }
+
+    renderApolloGrid("categoryProductsGrid", filtered);
+
+  } else {
+    // Show Standard Home View
+    if (heroSec) heroSec.style.display = 'grid';
+    if (trustSec) trustSec.style.display = 'grid';
+    if (quickSec) quickSec.style.display = 'grid';
+    if (secValue) secValue.style.display = 'block';
+    if (secFifty) secFifty.style.display = 'block';
+    if (secMeds) secMeds.style.display = 'block';
+    if (categoryListing) categoryListing.style.display = 'none';
+
+    const valueDeals = state.medicines.filter(m => m.price <= 100 || m.dealTag === "Value Deal");
+    renderGrid("valueDealsGrid", valueDeals.slice(0, 6));
+
+    const fiftyPercent = state.medicines.filter(m => m.mrp > 0 && Math.round(((m.mrp - m.price) / m.mrp) * 100) >= 40);
+    renderGrid("fiftyPercentGrid", fiftyPercent.slice(0, 6));
+
+    const medicines = state.medicines.filter(m => m.category === "Prescription Medicines" || m.rxRequired);
+    renderGrid("medicinesGrid", medicines.length > 0 ? medicines : state.medicines.slice(0, 6));
+  }
+}
+
+// Apollo Pharmacy Style Product Cards Renderer
+function renderApolloGrid(containerId, productList) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+
+  if (!productList || productList.length === 0) {
+    container.innerHTML = `
+      <div class="apollo-empty-state">
+        <i class="fa-solid fa-box-open" style="font-size:3rem; color:#cbd5e1; margin-bottom:12px;"></i>
+        <h4>No Products Available</h4>
+        <p style="font-size:0.85rem; color:var(--pharmacy-text-muted);">Try resetting filters or searching for another category.</p>
+        <button class="btn btn-secondary" onclick="resetCategoryFilters(); switchCategoryFilter('all');" style="margin-top:14px;"><i class="fa-solid fa-rotate-left"></i> View All Products</button>
+      </div>
+    `;
+    return;
   }
 
-  const valueDeals = filtered.filter(m => m.price <= 100 || m.dealTag === "Value Deal");
-  renderGrid("valueDealsGrid", valueDeals.slice(0, 6));
+  container.className = state.viewLayout === 'list' ? 'apollo-products-list-view' : 'apollo-products-grid';
 
-  const fiftyPercent = filtered.filter(m => m.mrp > 0 && Math.round(((m.mrp - m.price) / m.mrp) * 100) >= 40);
-  renderGrid("fiftyPercentGrid", fiftyPercent.slice(0, 6));
+  container.innerHTML = productList.map(med => {
+    const discountPct = med.mrp ? Math.round(((med.mrp - med.price) / med.mrp) * 100) : 0;
+    const cartItem = state.cart.find(c => c.id === med.id);
+    const qty = cartItem ? cartItem.qty : 0;
+    const img = med.imageUrl || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300';
+    
+    // Tag labels e.g. Pack / Diaper / Tablet
+    let packTag = 'Pack';
+    if (med.title.toLowerCase().includes('soap')) packTag = 'Soap';
+    else if (med.title.toLowerCase().includes('diaper')) packTag = 'Diaper';
+    else if (med.title.toLowerCase().includes('tablet')) packTag = 'Tablet';
+    else if (med.title.toLowerCase().includes('wash')) packTag = 'Bottle';
+    else if (med.title.toLowerCase().includes('capsule')) packTag = 'Capsule';
 
-  const medicines = filtered.filter(m => m.category === "Prescription Medicines" || m.rxRequired);
-  renderGrid("medicinesGrid", medicines.length > 0 ? medicines : filtered.slice(0, 6));
+    let unitPrice = '';
+    if (med.price <= 100) {
+      unitPrice = `₹${med.price.toFixed(2)}/unit`;
+    } else {
+      unitPrice = `₹${(med.price / 10).toFixed(2)}/unit`;
+    }
+
+    return `
+      <div class="apollo-product-card">
+        <!-- Top Image Container with Light Soft BG -->
+        <div class="apollo-img-box">
+          ${discountPct > 0 ? `
+            <span class="apollo-badge-discount">${med.dealTag ? med.dealTag + ', ' : ''}${discountPct}% OFF</span>
+          ` : (med.rxRequired ? `<span class="apollo-badge-rx"><i class="fa-solid fa-file-prescription"></i> Rx</span>` : '')}
+
+          <img src="${img}" alt="${med.title}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300'">
+
+          <!-- Apollo Style Add Button Positioned at Bottom Right of Image Container -->
+          <div class="apollo-action-slot">
+            ${qty === 0 ? `
+              <button class="apollo-btn-add" onclick="addToCart('${med.id}', event)">
+                Add
+              </button>
+            ` : `
+              <div class="apollo-qty-stepper">
+                <button class="apollo-stepper-btn" onclick="updateCartQty('${med.id}', -1)">-</button>
+                <span class="apollo-stepper-val">${qty}</span>
+                <button class="apollo-stepper-btn" onclick="updateCartQty('${med.id}', 1, event)">+</button>
+              </div>
+            `}
+          </div>
+        </div>
+
+        <!-- Product Information below Image Container -->
+        <div class="apollo-card-details">
+          <div class="apollo-tags-container">
+            <span class="apollo-tag-chip">${packTag}</span>
+            ${med.brand ? `<span class="apollo-tag-chip brand-chip">${med.brand.substring(0, 14)}</span>` : ''}
+          </div>
+
+          <h4 class="apollo-product-title" title="${med.title}">${med.title}</h4>
+          
+          <div class="apollo-product-sub">${med.salt ? med.salt : (med.description || 'Quality Healthcare Product')}</div>
+
+          <div class="apollo-price-section">
+            <div class="apollo-mrp-row">
+              ${med.mrp ? `<span class="apollo-mrp-text">MRP ₹${med.mrp.toFixed(2)}</span>` : ''}
+              ${discountPct > 0 ? `<span class="apollo-disc-green">${discountPct}% off</span>` : ''}
+            </div>
+
+            <div class="apollo-main-price-row">
+              <span class="apollo-final-price">₹${med.price.toFixed(2)}</span>
+              <span class="apollo-unit-cost">(${unitPrice})</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 
 function renderGrid(containerId, productList) {

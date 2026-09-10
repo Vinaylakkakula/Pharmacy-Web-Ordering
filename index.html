@@ -219,11 +219,60 @@
         </div>
       </section>
 
-      <!-- Active Filter Banner (When category selected) -->
-      <div id="activeFilterTitleBar" style="display:none; justify-content:space-between; align-items:center; background:#fff; padding:14px 24px; border-radius:12px; margin-bottom:24px; box-shadow:var(--shadow-sm); border:1px solid var(--pharmacy-border);">
-        <h3 id="activeFilterHeading" style="font-weight:800; color:var(--pharmacy-emerald-dark);">All Healthcare Products</h3>
-        <button class="btn btn-secondary" onclick="switchCategoryFilter('all')"><i class="fa-solid fa-times"></i> Clear Filter</button>
-      </div>
+      <!-- Dedicated Apollo Pharmacy Style Category View (Active when category or search selected) -->
+      <section id="categoryListingSection" class="category-page-wrapper" style="display:none;">
+        <!-- Breadcrumb Navigation -->
+        <nav class="cat-breadcrumb-nav">
+          <a href="javascript:void(0)" onclick="switchCategoryFilter('all')"><i class="fa-solid fa-house"></i> Home</a>
+          <i class="fa-solid fa-chevron-right breadcrumb-sep"></i>
+          <span id="categoryBreadcrumbActive">Baby Care</span>
+        </nav>
+
+        <!-- Category Title & Total Items Count -->
+        <div class="cat-header-title-row">
+          <h2 class="cat-main-heading">
+            <span id="categoryTitleName">Baby Care</span>
+            <span class="cat-total-count" id="categoryTotalCount">- Total Items (0)</span>
+          </h2>
+        </div>
+
+        <!-- Toolbar Strip: Grid/List Toggle, Filter Button, Sort By Dropdown -->
+        <div class="cat-toolbar-strip">
+          <div class="cat-toolbar-left">
+            <!-- Grid / List Layout Toggle -->
+            <button id="btnLayoutToggle" class="cat-tool-btn active-tool" onclick="toggleCategoryLayout()" title="Toggle Grid / List Layout">
+              <i id="layoutToggleIcon" class="fa-solid fa-border-all"></i>
+            </button>
+
+            <!-- Filter Trigger Button -->
+            <button class="cat-tool-btn cat-filter-btn" onclick="openCategoryFilterModal()">
+              <i class="fa-solid fa-sliders"></i> Filter <i class="fa-solid fa-chevron-down caret-icon"></i>
+            </button>
+          </div>
+
+          <div class="cat-toolbar-right">
+            <!-- Sort By Dropdown Selector -->
+            <div class="sort-select-wrapper">
+              <select id="categorySortSelect" class="sort-select-input" onchange="handleSortChange(this.value)">
+                <option value="relevance">Sort By: Popular</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="discount">Discount: High to Low</option>
+                <option value="name">Name: A to Z</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Active Filter Pills Strip -->
+        <div id="categoryActiveFilterPills" class="active-filter-pills-row" style="display:none;"></div>
+
+        <!-- Apollo Responsive Product Grid (2-column on mobile) -->
+        <div id="categoryProductsGrid" class="apollo-products-grid">
+          <!-- Dynamic Apollo style product cards rendered via app.js -->
+        </div>
+      </section>
+
 
       <!-- Section 1: Value Deals under Rs 100 -->
       <section id="sectionValueDeals" class="product-section">
@@ -1236,6 +1285,54 @@
         <div class="modal-footer" style="padding-left:0; padding-right:0; margin-top:16px;">
           <button type="button" class="btn btn-secondary" onclick="closePWAInstallModal()" style="width:100%; justify-content:center;">Got it!</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Category Filter Options Modal -->
+  <div id="categoryFilterModalOverlay" class="modal-overlay">
+    <div class="modal-box" style="max-width:440px;">
+      <div class="modal-header">
+        <h3><i class="fa-solid fa-sliders"></i> Filter Products</h3>
+        <button class="btn-close-drawer" onclick="closeCategoryFilterModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form onsubmit="applyCategoryFilters(event)">
+          <div class="form-group">
+            <label>Prescription Requirement</label>
+            <select id="filterRxSelect" class="form-control">
+              <option value="all">All Products (OTC & Rx)</option>
+              <option value="otc">No Prescription Required (OTC)</option>
+              <option value="rx">Prescription Required (Rx Only)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Minimum Discount</label>
+            <select id="filterDiscountSelect" class="form-control">
+              <option value="0">Any Price / Discount</option>
+              <option value="20">20% OFF or more</option>
+              <option value="35">35% OFF or more</option>
+              <option value="50">50% OFF or more</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Max Price Limit (₹)</label>
+            <select id="filterPriceSelect" class="form-control">
+              <option value="all">All Prices</option>
+              <option value="100">Under ₹100</option>
+              <option value="300">Under ₹300</option>
+              <option value="500">Under ₹500</option>
+              <option value="1000">Under ₹1000</option>
+            </select>
+          </div>
+
+          <div class="modal-footer" style="padding-left:0; padding-right:0; margin-top:20px; display:flex; gap:10px;">
+            <button type="button" class="btn btn-secondary" onclick="resetCategoryFilters()" style="flex:1; justify-content:center;">Reset</button>
+            <button type="submit" class="btn btn-primary" style="flex:2; justify-content:center;"><i class="fa-solid fa-check"></i> Apply Filters</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
