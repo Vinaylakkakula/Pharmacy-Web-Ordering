@@ -909,57 +909,7 @@ function renderApolloGrid(containerId, productList) {
 }
 
 function renderGrid(containerId, productList) {
-  const container = document.getElementById(containerId);
-  if (!container) return;
-
-  if (!productList || productList.length === 0) {
-    container.innerHTML = `<div style="grid-column:1/-1; padding:30px; text-align:center; color:var(--pharmacy-text-muted);">No products found in this section.</div>`;
-    return;
-  }
-
-  container.innerHTML = productList.map(med => {
-    const discountPct = med.mrp ? Math.round(((med.mrp - med.price) / med.mrp) * 100) : 0;
-    const cartItem = state.cart.find(c => c.id === med.id);
-    const qty = cartItem ? cartItem.qty : 0;
-    const img = med.imageUrl || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300';
-
-    return `
-      <div class="product-card">
-        ${med.dealTag ? `<span class="product-badge-deal">${med.dealTag}</span>` : ''}
-        ${med.rxRequired ? `<span class="product-badge-rx"><i class="fa-solid fa-file-prescription"></i> Rx</span>` : ''}
-        
-        <div class="product-image-box">
-          <img src="${img}" alt="${med.title}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300'">
-        </div>
-
-        <div class="product-details">
-          <div class="product-brand">${med.brand || 'Pharmacy Direct'}</div>
-          <div class="product-name" title="${med.title}">${med.title}</div>
-          <div class="product-pack-size">${med.salt ? 'Salt: ' + med.salt : 'Standard Pack'}</div>
-
-          <div class="product-price-row">
-            <div class="price-container">
-              <span class="sale-price">₹${med.price.toFixed(2)}</span>
-              ${med.mrp ? `<span class="mrp-price">₹${med.mrp.toFixed(2)}</span>` : ''}
-              ${discountPct > 0 ? `<span class="discount-badge">${discountPct}% OFF</span>` : ''}
-            </div>
-
-            ${qty === 0 ? `
-              <button class="btn-add-cart" onclick="addToCart('${med.id}', event)">
-                <i class="fa-solid fa-plus"></i> ADD
-              </button>
-            ` : `
-              <div class="qty-counter-control">
-                <button class="btn-qty-btn" onclick="updateCartQty('${med.id}', -1)">-</button>
-                <span class="qty-val">${qty}</span>
-                <button class="btn-qty-btn" onclick="updateCartQty('${med.id}', 1, event)">+</button>
-              </div>
-            `}
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
+  renderApolloGrid(containerId, productList);
 }
 
 // Cart Management

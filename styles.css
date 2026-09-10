@@ -1715,11 +1715,7 @@ header.main-header {
   }
   
   .floating-widgets-group {
-    bottom: 75px;
-    right: 12px;
-  }
-  .floating-offer-strip {
-    display: none; /* Hide offer banner on mobile screen to prevent view obstruction */
+    display: none !important; /* Hide floating widgets on mobile to prevent clutter and CTA obstruction */
   }
   
   .mobile-bottom-nav {
