@@ -1549,51 +1549,97 @@ header.main-header {
 /* Mobile & Small Tablets (max-width: 768px) */
 @media (max-width: 768px) {
   body {
-    padding-bottom: 85px;
+    padding-bottom: 75px;
   }
   .top-bar {
-    flex-direction: flex;
-    justify-content: space-between;
-    padding: 6px 14px;
-    font-size: 0.78rem;
+    padding: 5px 12px;
+    font-size: 0.75rem;
   }
   .top-bar-links {
-    display: none; /* Hide auxiliary links on mobile header to save vertical space */
+    display: none; /* Hide auxiliary links on mobile top bar */
   }
   .header-container {
+    padding: 8px 12px;
+    gap: 8px;
+    display: flex;
     flex-wrap: wrap;
-    padding: 10px 14px;
-    gap: 10px;
+    align-items: center;
+    justify-content: space-between;
   }
+  
+  /* Compact Brand Logo */
   .brand-logo {
     order: 1;
-  }
-  .brand-title .main-name {
-    font-size: 1.25rem;
-  }
-  .header-actions {
-    order: 2;
     gap: 8px;
   }
-  .btn-header-action {
-    padding: 8px 14px;
-    font-size: 0.82rem;
-    min-height: 38px;
+  .brand-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 1.2rem;
+    border-radius: 10px;
   }
+  .brand-title .main-name {
+    font-size: 1.15rem;
+  }
+  .brand-title .sub-name {
+    display: none; /* Hide long sub-name on mobile */
+  }
+
+  /* Compact Inline Location Pill */
   .location-selector {
-    order: 3;
-    width: 100%;
-    justify-content: center;
-    padding: 6px 14px;
-    font-size: 0.8rem;
+    order: 2;
+    width: auto;
+    padding: 4px 10px;
+    font-size: 0.72rem;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    border-color: rgba(255, 255, 255, 0.2);
   }
+  .location-selector div span:first-child {
+    display: none; /* Hide "DELIVER TO PINCODE" label on mobile */
+  }
+  .location-selector #currentAddressDisplay {
+    font-size: 0.75rem;
+  }
+
+  /* Compact Header Action Buttons (Icon only, text hidden on mobile) */
+  .header-actions {
+    order: 3;
+    gap: 6px;
+    margin-left: auto;
+  }
+  .btn-header-action {
+    padding: 6px 10px;
+    min-height: 36px;
+    font-size: 0.82rem;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  .btn-header-action span:not(.cart-btn-badge) {
+    display: none; /* Hide text labels on mobile header to prevent tall buttons */
+  }
+  .btn-header-action i {
+    font-size: 1.15rem;
+  }
+  .btn-header-action:first-child {
+    display: none; /* Hide duplicate Upload Rx button in header since it is in mobile bottom nav */
+  }
+
+  /* Compact Search Bar Row */
   .search-wrapper {
     order: 4;
-    max-width: 100%;
     width: 100%;
+    margin-top: 2px;
+  }
+  .search-input-group {
+    height: 40px;
+    padding: 0 14px;
+    border-radius: 20px;
+    background: #ffffff;
   }
   .search-input-group input {
-    font-size: 16px; /* Prevents iOS safari unwanted auto-zoom on input focus */
+    font-size: 0.85rem;
   }
   .category-subnav {
     top: 0;
