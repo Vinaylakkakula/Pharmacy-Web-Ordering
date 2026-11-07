@@ -275,6 +275,13 @@ const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxoXC9OO9AxaoE_
 const LOGO_MARK_URI = "data:image/svg+xml;charset=utf-8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Dhanush Medicals logo"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#14a38f"/><stop offset="0.55" stop-color="#047857"/><stop offset="1" stop-color="#013728"/></linearGradient><linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd25a"/><stop offset="1" stop-color="#f59e0b"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#g)"/><!-- Bow (Dhanush) --><path d="M33 9 C12 17 12 47 33 55" fill="none" stroke="url(#gold)" stroke-width="4.2" stroke-linecap="round"/><!-- Bow string = vertical bar of the medical cross --><rect x="29.5" y="12" width="7" height="40" rx="3.5" fill="#fff"/><!-- Arrow shaft = horizontal bar of the medical cross --><rect x="17" y="28.5" width="33" height="7" rx="3.5" fill="#fff"/><!-- Arrow head --><path d="M47 21.5 L58.5 32 L47 42.5 Z" fill="url(#gold)"/></svg>');
 const LOGO_FULL_URI = "data:image/svg+xml;charset=utf-8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 330 64" role="img" aria-label="Dhanush Medicals"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#14a38f"/><stop offset="0.55" stop-color="#047857"/><stop offset="1" stop-color="#013728"/></linearGradient><linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd25a"/><stop offset="1" stop-color="#f59e0b"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#g)"/><path d="M33 9 C12 17 12 47 33 55" fill="none" stroke="url(#gold)" stroke-width="4.2" stroke-linecap="round"/><rect x="29.5" y="12" width="7" height="40" rx="3.5" fill="#fff"/><rect x="17" y="28.5" width="33" height="7" rx="3.5" fill="#fff"/><path d="M47 21.5 L58.5 32 L47 42.5 Z" fill="url(#gold)"/><text x="78" y="39" font-family="Plus Jakarta Sans, Segoe UI, Arial, sans-serif" font-weight="800" font-size="31" letter-spacing="-0.8" fill="#013728">Dhanush</text><text x="79" y="56" font-family="Plus Jakarta Sans, Segoe UI, Arial, sans-serif" font-weight="700" font-size="12.5" letter-spacing="5.2" fill="#047857">MEDICALS</text></svg>');
 
+// >>> PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE (Deploy > Manage deployments > Web app URL, ends with /exec) <<<
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxoXC9OO9AxaoE_rSAqVjSV-xHkP00w8LO3UCfB_qUrmy7X8aqVYcgpiOejEPRHZxnv2Q/exec";
+
+// Built-in logo (embedded so it always displays, even if the image files are missing)
+const LOGO_MARK_URI = "data:image/svg+xml;charset=utf-8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Dhanush Medicals logo"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#14a38f"/><stop offset="0.55" stop-color="#047857"/><stop offset="1" stop-color="#013728"/></linearGradient><linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd25a"/><stop offset="1" stop-color="#f59e0b"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#g)"/><!-- Bow (Dhanush) --><path d="M33 9 C12 17 12 47 33 55" fill="none" stroke="url(#gold)" stroke-width="4.2" stroke-linecap="round"/><!-- Bow string = vertical bar of the medical cross --><rect x="29.5" y="12" width="7" height="40" rx="3.5" fill="#fff"/><!-- Arrow shaft = horizontal bar of the medical cross --><rect x="17" y="28.5" width="33" height="7" rx="3.5" fill="#fff"/><!-- Arrow head --><path d="M47 21.5 L58.5 32 L47 42.5 Z" fill="url(#gold)"/></svg>');
+const LOGO_FULL_URI = "data:image/svg+xml;charset=utf-8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 330 64" role="img" aria-label="Dhanush Medicals"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#14a38f"/><stop offset="0.55" stop-color="#047857"/><stop offset="1" stop-color="#013728"/></linearGradient><linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd25a"/><stop offset="1" stop-color="#f59e0b"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#g)"/><path d="M33 9 C12 17 12 47 33 55" fill="none" stroke="url(#gold)" stroke-width="4.2" stroke-linecap="round"/><rect x="29.5" y="12" width="7" height="40" rx="3.5" fill="#fff"/><rect x="17" y="28.5" width="33" height="7" rx="3.5" fill="#fff"/><path d="M47 21.5 L58.5 32 L47 42.5 Z" fill="url(#gold)"/><text x="78" y="39" font-family="Plus Jakarta Sans, Segoe UI, Arial, sans-serif" font-weight="800" font-size="31" letter-spacing="-0.8" fill="#013728">Dhanush</text><text x="79" y="56" font-family="Plus Jakarta Sans, Segoe UI, Arial, sans-serif" font-weight="700" font-size="12.5" letter-spacing="5.2" fill="#047857">MEDICALS</text></svg>');
+
 const INITIAL_BANNERS = [
   {
     id: "banner-1",
@@ -417,7 +424,7 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.removeItem("pharmacy_app_users");
         localStorage.removeItem("pharmacy_app_coupons");
         console.log("[PHARMACY] All localStorage data cleared via ?reset");
-      } catch(e) {}
+      } catch (e) { }
       window.location.href = window.location.pathname;
       return;
     }
@@ -434,7 +441,7 @@ document.addEventListener("DOMContentLoaded", () => {
     startFloatingOfferAutoSlider();
     initPWAInstaller();
     console.log("[PHARMACY] App initialized successfully ✓");
-  } catch(err) {
+  } catch (err) {
     console.error("[PHARMACY] Initialization error:", err);
     // If init crashes, try to clear bad data and reload
     try {
@@ -448,7 +455,7 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.removeItem("pharmacy_app_coupons");
       console.log("[PHARMACY] Cleared corrupted localStorage, reloading...");
       window.location.reload();
-    } catch(e) {}
+    } catch (e) { }
   }
 });
 
@@ -457,16 +464,15 @@ function loadStateFromStorage() {
   try {
     const savedConfig = localStorage.getItem("pharmacy_app_config");
     if (savedConfig) {
-      try { state.config = { ...state.config, ...JSON.parse(savedConfig) }; } catch(e) {}
+      try { state.config = { ...state.config, ...JSON.parse(savedConfig) }; } catch (e) { }
     }
-  } catch(e) {}
+  } catch (e) { }
 
   // Ensure default Live API URL and Admin Email are configured
   state.config.dbMode = "live";
-  state.config.apiUrl = APPS_SCRIPT_URL;
-  if (!state.config.adminEmail || state.config.adminEmail === "admin@pharmacy-express.com" ||
-      state.config.adminEmail === "vinaylakkakula1701@gmail.com") {
-    state.config.adminEmail = "shridevimedical6@gmail.com";
+  state.config.apiUrl = "https://script.google.com/macros/s/AKfycbzCova6urulEts5tGl1-ZdRsCIMqpHtyqI8MjDwQ2X6brif9WmV6MMXd01S6F9i_gN2/exec";
+  if (!state.config.adminEmail || state.config.adminEmail === "admin@pharmacy-express.com") {
+    state.config.adminEmail = "vinaylakkakula1701@gmail.com";
   }
 
   try {
@@ -477,7 +483,7 @@ function loadStateFromStorage() {
     } else {
       state.medicines = INITIAL_MEDICINES;
     }
-  } catch(e) {
+  } catch (e) {
     state.medicines = INITIAL_MEDICINES;
   }
 
@@ -489,7 +495,7 @@ function loadStateFromStorage() {
     } else {
       state.categories = INITIAL_CATEGORIES;
     }
-  } catch(e) {
+  } catch (e) {
     state.categories = INITIAL_CATEGORIES;
   }
 
@@ -508,7 +514,7 @@ function loadStateFromStorage() {
     } else {
       state.banners = INITIAL_BANNERS;
     }
-  } catch(e) {
+  } catch (e) {
     state.banners = INITIAL_BANNERS;
   }
 
@@ -520,28 +526,28 @@ function loadStateFromStorage() {
     } else {
       state.coupons = INITIAL_COUPONS;
     }
-  } catch(e) {
+  } catch (e) {
     state.coupons = INITIAL_COUPONS;
   }
 
   try {
     const savedOrders = localStorage.getItem("pharmacy_app_orders");
     state.orders = savedOrders ? JSON.parse(savedOrders) : INITIAL_ORDERS;
-  } catch(e) {
+  } catch (e) {
     state.orders = INITIAL_ORDERS;
   }
 
   try {
     const savedCart = localStorage.getItem("pharmacy_app_cart");
     state.cart = savedCart ? JSON.parse(savedCart) : [];
-  } catch(e) {
+  } catch (e) {
     state.cart = [];
   }
 
   try {
     const savedUsers = localStorage.getItem("pharmacy_app_users");
     state.users = savedUsers ? JSON.parse(savedUsers) : INITIAL_USERS;
-  } catch(e) {
+  } catch (e) {
     state.users = INITIAL_USERS;
   }
 
@@ -558,7 +564,7 @@ function saveStateToStorage() {
     localStorage.setItem("pharmacy_app_cart", JSON.stringify(state.cart));
     localStorage.setItem("pharmacy_app_users", JSON.stringify(state.users));
     localStorage.setItem("pharmacy_app_coupons", JSON.stringify(state.coupons));
-  } catch(e) {
+  } catch (e) {
     console.warn("Storage write skipped or restricted:", e);
   }
 }
@@ -593,24 +599,6 @@ function updateBrandUI() {
   }
 
   applyThemePreset(themePreset);
-  updateFooterUI(storeName);
-}
-
-// Footer / public contact details
-function updateFooterUI(storeName) {
-  const setText = (id, v) => { const el = document.getElementById(id); if (el) el.innerText = v; };
-  setText("footerStoreName", storeName);
-  setText("footerBuild", "Build v3 · API …" + APPS_SCRIPT_URL.replace(/\/exec$/, "").slice(-6));
-  const fl = document.querySelector(".dm-footer-logo"); if (fl) fl.src = LOGO_FULL_URI;
-  setText("footerYear", new Date().getFullYear());
-  if (state.config.storeAddress) setText("footerAddress", state.config.storeAddress);
-  if (state.config.storeHours) setText("footerHours", state.config.storeHours);
-  const licRow = document.getElementById("footerLicenseRow");
-  if (licRow) {
-    const lic = (state.config.drugLicense || "").trim();
-    licRow.style.display = lic ? "flex" : "none";
-    setText("footerLicense", lic);
-  }
 }
 
 function applyThemePreset(themeKey) {
@@ -634,7 +622,7 @@ function renderCategoryChips() {
   if (!chipBar) return;
 
   let html = `<div class="cat-chip ${state.activeCategoryFilter === 'all' && !state.searchQuery ? 'active' : ''}" data-category="all" onclick="switchCategoryFilter('all')"><i class="fa-solid fa-border-all"></i> All Products</div>`;
-  
+
   state.categories.forEach(cat => {
     const isActive = state.activeCategoryFilter === cat.name && !state.searchQuery;
     html += `
@@ -761,9 +749,9 @@ function renderProducts() {
     let filtered = state.medicines;
     if (state.searchQuery && state.searchQuery.trim().length > 0) {
       const q = state.searchQuery.toLowerCase().trim();
-      filtered = filtered.filter(m => 
-        m.title.toLowerCase().includes(q) || 
-        (m.salt && m.salt.toLowerCase().includes(q)) || 
+      filtered = filtered.filter(m =>
+        m.title.toLowerCase().includes(q) ||
+        (m.salt && m.salt.toLowerCase().includes(q)) ||
         (m.brand && m.brand.toLowerCase().includes(q)) ||
         m.category.toLowerCase().includes(q)
       );
@@ -877,7 +865,7 @@ function renderApolloGrid(containerId, productList) {
     const cartItem = state.cart.find(c => c.id === med.id);
     const qty = cartItem ? cartItem.qty : 0;
     const img = med.imageUrl || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300';
-    
+
     // Tag labels e.g. Pack / Diaper / Tablet
     let packTag = 'Pack';
     if (med.title.toLowerCase().includes('soap')) packTag = 'Soap';
@@ -1257,7 +1245,7 @@ function handleDirectRxSubmit(e) {
   const file = fileInput.files[0];
   const reader = new FileReader();
 
-  reader.onload = function(evt) {
+  reader.onload = function (evt) {
     const uploadedBase64 = evt.target.result;
     const orderId = "RX-" + Math.floor(1000 + Math.random() * 9000);
 
@@ -1316,13 +1304,9 @@ async function triggerAdminOrderEmailAlert(orderObj, isTestMode = false) {
         body: payload
       });
       let out = null;
-      try { out = await resp.json(); } catch (parseErr) {}
+      try { out = await resp.json(); } catch (parseErr) { }
       if (isTestMode) {
-        if (out && out.success) {
-          showToast(`✅ Server accepted the test alert (API …${APPS_SCRIPT_URL.replace(/\/exec$/, "").slice(-6)}). Check inbox/spam of ${targetEmail} and the admin WhatsApp.`, "success");
-        } else {
-          showToast(`⚠️ Server problem: ${(out && out.error) || ("HTTP " + resp.status + " - check Web App access is 'Anyone'")}`, "error");
-        }
+        showToast(`📧 Live Email Alert Dispatched to ${targetEmail}!`, "success");
       }
     } catch (err) {
       try {
@@ -1527,9 +1511,9 @@ function handleSearchInput(query) {
   }
 
   const q = query.toLowerCase().trim();
-  const matches = state.medicines.filter(m => 
-    m.title.toLowerCase().includes(q) || 
-    (m.salt && m.salt.toLowerCase().includes(q)) || 
+  const matches = state.medicines.filter(m =>
+    m.title.toLowerCase().includes(q) ||
+    (m.salt && m.salt.toLowerCase().includes(q)) ||
     (m.brand && m.brand.toLowerCase().includes(q)) ||
     m.category.toLowerCase().includes(q)
   );
@@ -1562,7 +1546,7 @@ function selectSearchProduct(medId) {
   if (input) input.value = med.title;
 
   switchView('storefront');
-  
+
   const dropdown = document.getElementById("searchResultsDropdown");
   if (dropdown) dropdown.classList.remove("active");
 
@@ -1655,7 +1639,7 @@ function handleStaffLogin(e) {
   state.currentUser = user;
   closeLoginModal();
   document.getElementById("userAuthText").innerText = user.name;
-  
+
   renderStaffDashboard();
   switchView('dashboard');
   showToast(`Welcome ${user.name} (${user.role.toUpperCase()})`, "success");
@@ -1838,7 +1822,7 @@ function openAddMedicineModal() {
   document.getElementById("medId").value = "";
   document.getElementById("medicineCrudForm").reset();
   document.getElementById("medicineModalTitle").innerHTML = `<i class="fa-solid fa-plus"></i> Add Pharmacy Item`;
-  
+
   const select = document.getElementById("medCategory");
   select.innerHTML = state.categories.map(c => `<option value="${c.name}">${c.name}</option>`).join('');
 
@@ -2060,7 +2044,7 @@ function saveBrandingSettings(e) {
   e.preventDefault();
   state.config.storeName = document.getElementById("adminConfigStoreName").value.trim();
   state.config.storeTagline = document.getElementById("adminConfigStoreTagline").value.trim();
-  
+
   const logoEl = document.getElementById("adminConfigLogoInput");
   if (logoEl) state.config.logoIcon = logoEl.value.trim();
 
@@ -2156,15 +2140,15 @@ function togglePasswordVisibility(username, actualPassword) {
 function openAddUserModal() {
   document.getElementById("userEditUsernameHidden").value = "";
   document.getElementById("userFullNameInput").value = "";
-  
+
   const usernameInput = document.getElementById("userUsernameInput");
   usernameInput.value = "";
   usernameInput.disabled = false;
-  
+
   document.getElementById("userRoleSelect").value = "pharmacist";
   document.getElementById("userPasswordInput").value = "";
   document.getElementById("userModalTitle").innerHTML = `<i class="fa-solid fa-user-plus"></i> Create New Staff Account`;
-  
+
   document.getElementById("userModalOverlay").classList.add("active");
 }
 
@@ -2174,11 +2158,11 @@ function openEditUserModal(username) {
 
   document.getElementById("userEditUsernameHidden").value = u.username;
   document.getElementById("userFullNameInput").value = u.name;
-  
+
   const usernameInput = document.getElementById("userUsernameInput");
   usernameInput.value = u.username;
   usernameInput.disabled = true;
-  
+
   document.getElementById("userRoleSelect").value = u.role;
   document.getElementById("userPasswordInput").value = u.password;
   document.getElementById("userModalTitle").innerHTML = `<i class="fa-solid fa-user-pen"></i> Edit Staff Account & Reset Password`;
@@ -2861,7 +2845,7 @@ function initPWAInstaller() {
         .then((reg) => console.log('[PWA] Service Worker registered scope:', reg.scope))
         .catch((err) => console.log('[PWA] Service Worker registration failed:', err));
     }
-  } catch(e) {}
+  } catch (e) { }
 
   try {
     window.addEventListener('beforeinstallprompt', (e) => {
@@ -2873,7 +2857,7 @@ function initPWAInstaller() {
 
       const banner = document.getElementById('pwaInstallBanner');
       let isDismissed = false;
-      try { isDismissed = sessionStorage.getItem('pwa_banner_dismissed') === 'true'; } catch(err) {}
+      try { isDismissed = sessionStorage.getItem('pwa_banner_dismissed') === 'true'; } catch (err) { }
       if (banner && !isDismissed) {
         banner.style.display = 'flex';
       }
@@ -2886,7 +2870,7 @@ function initPWAInstaller() {
       const topBtn = document.getElementById('pwaInstallTopBtn');
       if (topBtn) topBtn.style.display = 'none';
     });
-  } catch(e) {}
+  } catch (e) { }
 }
 
 function triggerPWAInstall() {
