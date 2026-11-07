@@ -457,16 +457,30 @@ function loadStateFromStorage() {
   try {
     const savedConfig = localStorage.getItem("pharmacy_app_config");
     if (savedConfig) {
-      try { state.config = { ...state.config, ...JSON.parse(savedConfig) }; } catch (e) { }
+      try {
+        const parsed = JSON.parse(savedConfig);
+        // Migrate away from old Apps Script URL or old email if cached in localStorage
+        if (parsed.apiUrl && (parsed.apiUrl.includes("AKfycbzCova6urulEts5tGl1-ZdRsCIMqpHtyqI8MjDwQ2X6brif9WmV6MMXd01S6F9i_gN2") || !parsed.apiUrl)) {
+          parsed.apiUrl = APPS_SCRIPT_URL;
+        }
+        if (parsed.adminEmail === "vinaylakkakula1701@gmail.com" || parsed.adminEmail === "admin@pharmacy-express.com" || !parsed.adminEmail) {
+          parsed.adminEmail = "shridevimedical6@gmail.com";
+        }
+        state.config = { ...state.config, ...parsed };
+      } catch (e) { }
     }
   } catch (e) { }
 
-  // Ensure default Live API URL and Admin Email are configured
+  // Ensure default Live API URL and Admin Email are configured to the active deployment
   state.config.dbMode = "live";
-  state.config.apiUrl = "https://script.google.com/macros/s/AKfycbzCova6urulEts5tGl1-ZdRsCIMqpHtyqI8MjDwQ2X6brif9WmV6MMXd01S6F9i_gN2/exec";
-  if (!state.config.adminEmail || state.config.adminEmail === "admin@pharmacy-express.com") {
-    state.config.adminEmail = "vinaylakkakula1701@gmail.com";
+  if (!state.config.apiUrl || state.config.apiUrl.includes("AKfycbzCova6urulEts5tGl1-ZdRsCIMqpHtyqI8MjDwQ2X6brif9WmV6MMXd01S6F9i_gN2")) {
+    state.config.apiUrl = APPS_SCRIPT_URL;
   }
+  if (!state.config.adminEmail || state.config.adminEmail === "admin@pharmacy-express.com" || state.config.adminEmail === "vinaylakkakula1701@gmail.com") {
+    state.config.adminEmail = "shridevimedical6@gmail.com";
+  }
+  // Persist clean migrated config
+  try { localStorage.setItem("pharmacy_app_config", JSON.stringify(state.config)); } catch (e) { }
 
   try {
     const savedMeds = localStorage.getItem("pharmacy_app_medicines");
@@ -564,9 +578,9 @@ function saveStateToStorage() {
 
 // Dynamic Branding UI & Theme Preset Update
 function updateBrandUI() {
-  const storeName = state.config.storeName || "MediExpress Pharmacy";
+  const storeName = state.config.storeName || "Dhanush Medicals";
   const storeTagline = state.config.storeTagline || "ONLINE PHARMACY WEB ORDERING";
-  const logoInput = state.config.logoIcon || "fa-prescription-bottle-medical";
+  const logoInput = state.config.logoIcon || "logo-mark.svg";
   const themePreset = state.config.themePreset || "emerald";
 
   const brandNameEl = document.getElementById("headerBrandName");
@@ -578,16 +592,50 @@ function updateBrandUI() {
   const docTitleEl = document.getElementById("docTitle");
   if (docTitleEl) docTitleEl.innerText = `${storeName} - Online Medical Store & Web Ordering`;
 
-  // Dynamic Brand Icon / Logo Image
+  // Dynamic Header Brand Icon / Logo Image
+  const isCustomImage = /^(https?:|data:|\.\/|img\/)/i.test(logoInput) || /\.(svg|png|jpe?g|webp)(\?.*)?$/i.test(logoInput);
   const brandIconContainer = document.querySelector(".brand-logo .brand-icon");
   if (brandIconContainer) {
-    // The old default icon is upgraded to the new Dhanush logo automatically
-    const effectiveLogo = (logoInput === "fa-prescription-bottle-medical" || logoInput === "logo-mark.svg") ? LOGO_MARK_URI : logoInput;
-    if (/^(https?:|data:|\.\/|img\/)/.test(effectiveLogo) || /\.(svg|png|jpe?g|webp)$/i.test(effectiveLogo)) {
-      brandIconContainer.innerHTML = `<img src="${effectiveLogo}" alt="${storeName} logo">`;
+    if (isCustomImage && logoInput !== "logo-mark.svg" && logoInput !== "logo.svg") {
+      brandIconContainer.innerHTML = `<img src="${logoInput}" alt="${storeName} logo" style="width:100%; height:100%; object-fit:contain;">`;
+    } else if (logoInput === "fa-prescription-bottle-medical" || logoInput === "logo-mark.svg" || logoInput === "logo.svg") {
+      brandIconContainer.innerHTML = `<img src="${LOGO_MARK_URI}" alt="${storeName} logo" style="width:100%; height:100%; object-fit:contain;">`;
     } else {
       const iconClass = logoInput.startsWith("fa-") ? logoInput : ("fa-" + logoInput);
       brandIconContainer.innerHTML = `<i class="fa-solid ${iconClass}"></i>`;
+    }
+  }
+
+  // Dynamic Footer Logo & Store Name
+  const footerLogoEl = document.querySelector(".dm-footer-logo");
+  if (footerLogoEl) {
+    if (isCustomImage && logoInput !== "logo-mark.svg" && logoInput !== "logo.svg") {
+      footerLogoEl.src = logoInput;
+      footerLogoEl.alt = storeName;
+      footerLogoEl.style.objectFit = "contain";
+    } else {
+      footerLogoEl.src = LOGO_FULL_URI;
+      footerLogoEl.alt = storeName;
+    }
+  }
+
+  const footerStoreNameEl = document.getElementById("footerStoreName");
+  if (footerStoreNameEl) footerStoreNameEl.innerText = storeName;
+
+  const footerAddressEl = document.getElementById("footerAddress");
+  if (footerAddressEl && state.config.storeAddress) footerAddressEl.innerText = state.config.storeAddress;
+
+  const footerHoursEl = document.getElementById("footerHours");
+  if (footerHoursEl && state.config.storeHours) footerHoursEl.innerText = state.config.storeHours;
+
+  const footerLicenseRow = document.getElementById("footerLicenseRow");
+  const footerLicenseEl = document.getElementById("footerLicense");
+  if (footerLicenseRow && footerLicenseEl) {
+    if (state.config.drugLicense && state.config.drugLicense.trim()) {
+      footerLicenseRow.style.display = "flex";
+      footerLicenseEl.innerText = state.config.drugLicense.trim();
+    } else {
+      footerLicenseRow.style.display = "none";
     }
   }
 
