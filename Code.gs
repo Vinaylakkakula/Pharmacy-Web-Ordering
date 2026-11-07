@@ -112,6 +112,41 @@ function doPost(e) {
         }
         break;
 
+      case "getSettings":
+        result.data = getSettingsMap();
+        result.success = true;
+        break;
+
+      case "saveSettings":
+        try {
+          let settingsSheet = ss.getSheetByName("Settings");
+          if (!settingsSheet) {
+            initDatabase();
+            settingsSheet = ss.getSheetByName("Settings");
+          }
+          const rows = settingsSheet.getDataRange().getValues();
+          for (let key in data) {
+            let found = false;
+            for (let i = 1; i < rows.length; i++) {
+              if (rows[i][0] == key) {
+                settingsSheet.getRange(i + 1, 2).setValue(String(data[key]));
+                rows[i][1] = String(data[key]);
+                found = true;
+                break;
+              }
+            }
+            if (!found) {
+              settingsSheet.appendRow([key, String(data[key])]);
+            }
+          }
+          result.data = getSettingsMap();
+          result.success = true;
+        } catch (errSaveSet) {
+          result.success = false;
+          result.error = errSaveSet.toString();
+        }
+        break;
+
       case "saveMedicine":
         result.data = saveRowData("Medicines", data);
         result.success = true;

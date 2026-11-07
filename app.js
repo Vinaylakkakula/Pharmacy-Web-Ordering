@@ -424,6 +424,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     loadStateFromStorage();
     updateBrandUI();
+    fetchLiveStoreSettingsFromAPI();
     renderHeroBanner();
     startHeroBannerAutoSlider();
     renderCategoryChips();
@@ -451,6 +452,40 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (e) { }
   }
 });
+
+// Fetch Live Store Branding & Settings from Cloud Backend (Google Sheets)
+async function fetchLiveStoreSettingsFromAPI() {
+  if (!state.config.apiUrl) return;
+  try {
+    const res = await fetch(state.config.apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ action: "getSettings" })
+    });
+    const json = await res.json();
+    if (json && json.success && json.data && Object.keys(json.data).length > 0) {
+      const s = json.data;
+      let changed = false;
+      if (s.storeName && s.storeName !== state.config.storeName) { state.config.storeName = s.storeName; changed = true; }
+      if (s.storeTagline && s.storeTagline !== state.config.storeTagline) { state.config.storeTagline = s.storeTagline; changed = true; }
+      if (s.logoIcon && s.logoIcon !== state.config.logoIcon) { state.config.logoIcon = s.logoIcon; changed = true; }
+      if (s.themePreset && s.themePreset !== state.config.themePreset) { state.config.themePreset = s.themePreset; changed = true; }
+      if (s.adminEmail && s.adminEmail !== state.config.adminEmail) { state.config.adminEmail = s.adminEmail; changed = true; }
+      if (s.whatsappNumber && s.whatsappNumber !== state.config.whatsappNumber) { state.config.whatsappNumber = s.whatsappNumber; changed = true; }
+      if (s.storeAddress && s.storeAddress !== state.config.storeAddress) { state.config.storeAddress = s.storeAddress; changed = true; }
+      if (s.storeHours && s.storeHours !== state.config.storeHours) { state.config.storeHours = s.storeHours; changed = true; }
+      if (s.drugLicense !== undefined && s.drugLicense !== state.config.drugLicense) { state.config.drugLicense = s.drugLicense; changed = true; }
+
+      if (changed) {
+        saveStateToStorage();
+        updateBrandUI();
+        console.log("[PHARMACY] Live store settings synced from cloud backend ✓", state.config.storeName);
+      }
+    }
+  } catch (err) {
+    console.warn("Could not sync live store settings from backend:", err);
+  }
+}
 
 // State Persistence
 function loadStateFromStorage() {
@@ -2144,6 +2179,39 @@ function saveBrandingSettings(e) {
   saveStateToStorage();
   updateBrandUI();
   updateDynamicCouponsUI();
+
+  // Sync to Cloud Backend (Google Sheets) so all devices/phones immediately see the changes
+  if (state.config.apiUrl) {
+    showToast("☁️ Syncing branding settings to cloud backend...", "info");
+    fetch(state.config.apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({
+        action: "saveSettings",
+        data: {
+          storeName: state.config.storeName,
+          storeTagline: state.config.storeTagline,
+          logoIcon: state.config.logoIcon,
+          themePreset: state.config.themePreset,
+          adminEmail: state.config.adminEmail,
+          whatsappNumber: state.config.whatsappNumber,
+          showFloatingCoupons: String(state.config.showFloatingCoupons),
+          emailAlertsEnabled: String(state.config.emailAlertsEnabled),
+          storeAddress: state.config.storeAddress || "",
+          storeHours: state.config.storeHours || "",
+          drugLicense: state.config.drugLicense || ""
+        }
+      })
+    })
+    .then(r => r.json())
+    .then(resp => {
+      if (resp && resp.success) {
+        showToast("✅ Branding & Logo synced to cloud! All devices/phones will now see updated settings.", "success");
+      }
+    })
+    .catch(err => console.warn("Cloud branding sync notice:", err));
+  }
+
   showToast(`App Branding & WhatsApp Settings saved!`, "success");
 }
 
