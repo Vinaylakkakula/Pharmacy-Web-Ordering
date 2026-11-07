@@ -23,6 +23,31 @@
  */
 
 function doGet(e) {
+  const action = (e && e.parameter && e.parameter.action) ? e.parameter.action : "";
+
+  // Instant GET response for Settings (bypasses CORS preflight for blazing-fast mobile sync)
+  if (action === "getSettings") {
+    return ContentService.createTextOutput(JSON.stringify({
+      success: true,
+      data: getSettingsMap()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  // Instant GET response for Store Init
+  if (action === "init") {
+    return ContentService.createTextOutput(JSON.stringify({
+      success: true,
+      data: {
+        medicines: getSheetData("Medicines"),
+        categories: getSheetData("Categories"),
+        orders: getSheetData("Orders"),
+        users: getSheetData("Users"),
+        banners: getSheetData("Banners"),
+        settings: getSettingsMap()
+      }
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+
   // Open the Web App URL in a browser to see this status page (no secrets are shown).
   const props = PropertiesService.getScriptProperties();
   const emails = props.getProperty("ADMIN_EMAILS") || "(not set - using email sent by the website)";

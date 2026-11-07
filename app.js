@@ -273,7 +273,7 @@ const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzVFsN3YVnSqhpn
 
 // Built-in logo (embedded so it always displays, even if the image files are missing)
 const LOGO_MARK_URI = "data:image/svg+xml;charset=utf-8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Dhanush Medicals logo"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#14a38f"/><stop offset="0.55" stop-color="#047857"/><stop offset="1" stop-color="#013728"/></linearGradient><linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd25a"/><stop offset="1" stop-color="#f59e0b"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#g)"/><!-- Bow (Dhanush) --><path d="M33 9 C12 17 12 47 33 55" fill="none" stroke="url(#gold)" stroke-width="4.2" stroke-linecap="round"/><!-- Bow string = vertical bar of the medical cross --><rect x="29.5" y="12" width="7" height="40" rx="3.5" fill="#fff"/><!-- Arrow shaft = horizontal bar of the medical cross --><rect x="17" y="28.5" width="33" height="7" rx="3.5" fill="#fff"/><!-- Arrow head --><path d="M47 21.5 L58.5 32 L47 42.5 Z" fill="url(#gold)"/></svg>');
-const LOGO_FULL_URI = "data:image/svg+xml;charset=utf-8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 330 64" role="img" aria-label="Dhanush Medicals"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#14a38f"/><stop offset="0.55" stop-color="#047857"/><stop offset="1" stop-color="#013728"/></linearGradient><linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd25a"/><stop offset="1" stop-color="#f59e0b"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#g)"/><path d="M33 9 C12 17 12 47 33 55" fill="none" stroke="url(#gold)" stroke-width="4.2" stroke-linecap="round"/><rect x="29.5" y="12" width="7" height="40" rx="3.5" fill="#fff"/><rect x="17" y="28.5" width="33" height="7" rx="3.5" fill="#fff"/><path d="M47 21.5 L58.5 32 L47 42.5 Z" fill="url(#gold)"/><text x="78" y="39" font-family="Plus Jakarta Sans, Segoe UI, Arial, sans-serif" font-weight="800" font-size="31" letter-spacing="-0.8" fill="#013728">Dhanush</text><text x="79" y="56" font-family="Plus Jakarta Sans, Segoe UI, Arial, sans-serif" font-weight="700" font-size="12.5" letter-spacing="5.2" fill="#047857">MEDICALS</text></svg>');
+const LOGO_FULL_URI = "data:image/svg+xml;charset=utf-8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 330 64" role="img" aria-label="ShriDevi Medicals"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#14a38f"/><stop offset="0.55" stop-color="#047857"/><stop offset="1" stop-color="#013728"/></linearGradient><linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd25a"/><stop offset="1" stop-color="#f59e0b"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#g)"/><path d="M33 9 C12 17 12 47 33 55" fill="none" stroke="url(#gold)" stroke-width="4.2" stroke-linecap="round"/><rect x="29.5" y="12" width="7" height="40" rx="3.5" fill="#fff"/><rect x="17" y="28.5" width="33" height="7" rx="3.5" fill="#fff"/><path d="M47 21.5 L58.5 32 L47 42.5 Z" fill="url(#gold)"/><text x="78" y="39" font-family="Plus Jakarta Sans, Segoe UI, Arial, sans-serif" font-weight="800" font-size="28" letter-spacing="-0.5" fill="#013728">ShriDevi</text><text x="79" y="56" font-family="Plus Jakarta Sans, Segoe UI, Arial, sans-serif" font-weight="700" font-size="12.5" letter-spacing="5.2" fill="#047857">MEDICALS</text></svg>');
 
 const INITIAL_BANNERS = [
   {
@@ -455,14 +455,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
 // Fetch Live Store Branding & Settings from Cloud Backend (Google Sheets)
 async function fetchLiveStoreSettingsFromAPI() {
-  if (!state.config.apiUrl) return;
+  const apiUrl = state.config.apiUrl || APPS_SCRIPT_URL;
+  if (!apiUrl) return;
   try {
-    const res = await fetch(state.config.apiUrl, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ action: "getSettings" })
-    });
-    const json = await res.json();
+    // Ultra-fast GET request (avoids CORS preflight latency) with cache-busting timestamp
+    const getUrl = apiUrl + (apiUrl.includes("?") ? "&" : "?") + "action=getSettings&_t=" + Date.now();
+    let json = null;
+    try {
+      const res = await fetch(getUrl, { method: "GET" });
+      json = await res.json();
+    } catch (eGet) {
+      // Fallback to POST if GET fails
+      const postRes = await fetch(apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "getSettings" })
+      });
+      json = await postRes.json();
+    }
+
     if (json && json.success && json.data && Object.keys(json.data).length > 0) {
       const s = json.data;
       let changed = false;
@@ -485,6 +496,16 @@ async function fetchLiveStoreSettingsFromAPI() {
   } catch (err) {
     console.warn("Could not sync live store settings from backend:", err);
   }
+}
+
+// Immediate & Background auto-sync listener for mobile phones and multi-tab switching
+if (typeof window !== "undefined") {
+  window.addEventListener("focus", () => fetchLiveStoreSettingsFromAPI());
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") fetchLiveStoreSettingsFromAPI();
+  });
+  // Auto-refresh settings every 20 seconds in background
+  setInterval(() => fetchLiveStoreSettingsFromAPI(), 20000);
 }
 
 // State Persistence
