@@ -4,13 +4,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title id="docTitle">Dhanush Medicals - Online Pharmacy in Korutla | Medicines Delivered to Your Door</title>
+  <title id="docTitle">ShriDevi Medicals - Online Pharmacy in Korutla | Medicines Delivered to Your Door</title>
   <meta name="description"
-    content="Dhanush Medicals, Korutla: order medicines, upload your doctor's prescription, and get genuine healthcare products delivered to your doorstep. Verified pharmacists, express delivery, COD & UPI.">
+    content="ShriDevi Medicals, Korutla: order medicines, upload your doctor's prescription, and get genuine healthcare products delivered to your doorstep. Verified pharmacists, express delivery, COD & UPI.">
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
   <link rel="canonical" href="https://pharmacy-web-ordering.vercel.app/">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="Dhanush Medicals - Online Pharmacy in Korutla">
+  <meta property="og:title" content="ShriDevi Medicals - Online Pharmacy in Korutla">
   <meta property="og:description"
     content="Genuine medicines, prescription upload and express doorstep delivery in Korutla.">
   <meta property="og:image" content="https://pharmacy-web-ordering.vercel.app/icon-512.png">
@@ -82,7 +82,7 @@
           <img src="logo-mark.svg" alt="Dhanush Medicals logo">
         </div>
         <div class="brand-title">
-          <span id="headerBrandName" class="main-name">Dhanush Medicals</span>
+          <span id="headerBrandName" class="main-name">ShriDevi Medicals</span>
           <span id="headerBrandSub" class="sub-name">ONLINE PHARMACY WEB ORDERING</span>
         </div>
       </a>
@@ -569,8 +569,10 @@
             <span style="font-size:0.85rem; color:var(--pharmacy-text-muted);">Instant email notifications & live cloud
               database sync</span>
           </div>
-          <button class="btn btn-primary" onclick="syncLiveOrdersFromAPI()"><i class="fa-solid fa-rotate"></i> Sync Live
-            Orders & Prescriptions</button>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn btn-primary" onclick="syncLiveOrdersFromAPI()"><i class="fa-solid fa-rotate"></i> Sync Live Orders</button>
+            <button class="btn btn-danger" onclick="clearAllOrders()" style="background:#dc2626;"><i class="fa-solid fa-trash-can"></i> Clear All Orders (Reset to 0)</button>
+          </div>
         </div>
         <div class="table-responsive">
           <table class="custom-table">
@@ -1606,7 +1608,7 @@
       medical practitioner. Information on this website is for general guidance and is not a substitute for professional
       medical advice. Please consult your doctor or pharmacist before use.</div>
     <div class="dm-footer-bottom">
-      <span>&copy; <span id="footerYear">2026</span> <span id="footerStoreName">Dhanush Medicals</span>. All rights
+      <span>&copy; <span id="footerYear">2026</span> <span id="footerStoreName">ShriDevi Medicals</span>. All rights
         reserved. <span id="footerBuild" style="opacity:.55; margin-left:8px;"></span></span>
       <span>
         <a href="javascript:void(0)" onclick="openLoginModal(event)">Staff Login</a>
@@ -1642,7 +1644,7 @@
   <div id="toastContainer" class="toast-container"></div>
 
   <!-- JavaScript -->
-  <script src="app.js?v=20261107-3"></script>
+  <script src="app.js?v=20261107-4"></script>
 </body>
 
 </html>

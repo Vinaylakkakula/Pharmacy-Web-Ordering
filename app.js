@@ -394,7 +394,7 @@ let state = {
     storeHours: "Open daily 8:00 AM - 10:00 PM",
     drugLicense: "",                           // e.g. "Drug Licence No: TS/JGL/xxxx" (shown in footer when filled)
     showFloatingCoupons: true,
-    storeName: "Dhanush Medicals",
+    storeName: "ShriDevi Medicals",
     storeTagline: "ONLINE PHARMACY WEB ORDERING",
     logoIcon: "logo-mark.svg",
     themePreset: "emerald",
@@ -2067,6 +2067,41 @@ async function syncLiveOrdersFromAPI() {
     console.warn("Live orders sync warning:", err);
     showToast("Live order sync completed. Showing latest stored orders.", "info");
   }
+}
+
+// Clear All Orders (Reset order count & revenue to 0)
+async function clearAllOrders() {
+  if (!confirm("Are you sure you want to clear ALL orders and reset count & revenue to zero? This action cannot be undone.")) {
+    return;
+  }
+
+  state.orders = [];
+  try {
+    localStorage.removeItem("pharmacy_app_orders");
+    localStorage.setItem("pharmacy_app_orders", JSON.stringify([]));
+  } catch (e) { }
+
+  saveStateToStorage();
+  renderAdminTables();
+  if (typeof renderPharmacistQueue === "function") renderPharmacistQueue();
+  if (typeof renderRiderPortal === "function") renderRiderPortal();
+
+  // Also clear orders in Google Sheets backend
+  if (state.config.apiUrl) {
+    showToast("Clearing orders from cloud database...", "info");
+    try {
+      await fetch(state.config.apiUrl, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify({ action: "clearOrders" })
+      });
+      showToast("✅ Cloud database orders cleared!", "success");
+    } catch (e) {
+      console.warn("Cloud clearOrders note:", e);
+    }
+  }
+
+  showToast("🎉 All orders cleared! Order count and revenue reset to 0.", "success");
 }
 
 function updateOrderStatus(orderId, newStatus) {

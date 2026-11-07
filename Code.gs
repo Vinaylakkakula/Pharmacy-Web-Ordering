@@ -98,6 +98,20 @@ function doPost(e) {
         result.success = true;
         break;
 
+      case "clearOrders":
+        try {
+          const ordersSheet = ss.getSheetByName("Orders");
+          if (ordersSheet && ordersSheet.getLastRow() > 1) {
+            ordersSheet.deleteRows(2, ordersSheet.getLastRow() - 1);
+          }
+          result.data = [];
+          result.success = true;
+        } catch (errClear) {
+          result.success = false;
+          result.error = errClear.toString();
+        }
+        break;
+
       case "saveMedicine":
         result.data = saveRowData("Medicines", data);
         result.success = true;
