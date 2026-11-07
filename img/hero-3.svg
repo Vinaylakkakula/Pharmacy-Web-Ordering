@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 300" fill="none">
+<defs>
+<linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd25a"/><stop offset="1" stop-color="#f59e0b"/></linearGradient>
+<radialGradient id="glow"><stop offset="0" stop-color="#34d3b5" stop-opacity=".5"/><stop offset="1" stop-color="#34d3b5" stop-opacity="0"/></radialGradient>
+</defs>
+<circle cx="215" cy="150" r="145" fill="url(#glow)"/>
+<circle cx="215" cy="150" r="118" stroke="#fff" stroke-opacity=".15" stroke-width="2" stroke-dasharray="4 10"/>
+<!-- bag -->
+<g transform="translate(86 66) scale(.88)">
+<path d="M50 40V28a40 40 0 0 1 80 0v12" stroke="#fff" stroke-width="9" stroke-linecap="round"/>
+<path d="M14 40h152l12 150a14 14 0 0 1-14 15H16a14 14 0 0 1-14-15z" fill="#fff"/>
+<path d="M14 40h152l3 38H11z" fill="#d1fae5"/>
+<rect x="64" y="104" width="52" height="52" rx="12" fill="#047857"/>
+<rect x="85" y="114" width="10" height="32" rx="3" fill="#fff"/><rect x="74" y="125" width="32" height="10" rx="3" fill="#fff"/>
+<rect x="38" y="170" width="104" height="6" rx="3" fill="#d1fae5"/>
+</g>
+<!-- badge -->
+<g transform="translate(222 22) scale(.92)">
+<path d="M100 0l22 13 25-5 12 23 25 9-3 26 17 19-17 20 3 26-25 9-12 23-25-5-22 13-22-13-25 5-12-23-25-9 3-26-17-20 17-19-3-26 25-9 12-23 25 5z" fill="url(#gold)"/>
+<text x="100" y="104" text-anchor="middle" font-family="Plus Jakarta Sans, Arial, sans-serif" font-weight="800" font-size="62" fill="#013728">20%</text>
+<text x="100" y="140" text-anchor="middle" font-family="Plus Jakarta Sans, Arial, sans-serif" font-weight="800" font-size="26" letter-spacing="5" fill="#013728">OFF</text>
+</g>
+<!-- coin / pills -->
+<circle cx="350" cy="240" r="22" fill="#fff"/><path d="M328 240h44" stroke="#c7f0e4" stroke-width="4"/>
+<g transform="translate(248 232) rotate(-25)"><rect width="76" height="30" rx="15" fill="#fff"/><path d="M38 0h23a15 15 0 0 1 0 30H38z" fill="#047857"/></g>
+<path d="M60 62l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" fill="#fff" fill-opacity=".85"/>
+<path d="M392 150l3 7 7 3-7 3-3 7-3-7-7-3 7-3z" fill="#fff" fill-opacity=".7"/>
+</svg>

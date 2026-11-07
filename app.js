@@ -268,6 +268,13 @@ const INITIAL_COUPONS = [
   }
 ];
 
+// >>> PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE (Deploy > Manage deployments > Web app URL, ends with /exec) <<<
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxoXC9OO9AxaoE_rSAqVjSV-xHkP00w8LO3UCfB_qUrmy7X8aqVYcgpiOejEPRHZxnv2Q/exec";
+
+// Built-in logo (embedded so it always displays, even if the image files are missing)
+const LOGO_MARK_URI = "data:image/svg+xml;charset=utf-8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Dhanush Medicals logo"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#14a38f"/><stop offset="0.55" stop-color="#047857"/><stop offset="1" stop-color="#013728"/></linearGradient><linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd25a"/><stop offset="1" stop-color="#f59e0b"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#g)"/><!-- Bow (Dhanush) --><path d="M33 9 C12 17 12 47 33 55" fill="none" stroke="url(#gold)" stroke-width="4.2" stroke-linecap="round"/><!-- Bow string = vertical bar of the medical cross --><rect x="29.5" y="12" width="7" height="40" rx="3.5" fill="#fff"/><!-- Arrow shaft = horizontal bar of the medical cross --><rect x="17" y="28.5" width="33" height="7" rx="3.5" fill="#fff"/><!-- Arrow head --><path d="M47 21.5 L58.5 32 L47 42.5 Z" fill="url(#gold)"/></svg>');
+const LOGO_FULL_URI = "data:image/svg+xml;charset=utf-8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 330 64" role="img" aria-label="Dhanush Medicals"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#14a38f"/><stop offset="0.55" stop-color="#047857"/><stop offset="1" stop-color="#013728"/></linearGradient><linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd25a"/><stop offset="1" stop-color="#f59e0b"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#g)"/><path d="M33 9 C12 17 12 47 33 55" fill="none" stroke="url(#gold)" stroke-width="4.2" stroke-linecap="round"/><rect x="29.5" y="12" width="7" height="40" rx="3.5" fill="#fff"/><rect x="17" y="28.5" width="33" height="7" rx="3.5" fill="#fff"/><path d="M47 21.5 L58.5 32 L47 42.5 Z" fill="url(#gold)"/><text x="78" y="39" font-family="Plus Jakarta Sans, Segoe UI, Arial, sans-serif" font-weight="800" font-size="31" letter-spacing="-0.8" fill="#013728">Dhanush</text><text x="79" y="56" font-family="Plus Jakarta Sans, Segoe UI, Arial, sans-serif" font-weight="700" font-size="12.5" letter-spacing="5.2" fill="#047857">MEDICALS</text></svg>');
+
 const INITIAL_BANNERS = [
   {
     id: "banner-1",
@@ -276,7 +283,7 @@ const INITIAL_BANNERS = [
     description: "Quality generic & branded prescription medicines delivered directly to your doorstep with up to 50% savings.",
     buttonText: "Explore Pharmacy Savings",
     buttonAction: "switchCategoryFilter('Prescription Medicines')",
-    imageUrl: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500&auto=format&fit=crop&q=80",
+    imageUrl: "img/hero-1.svg",
     bgGradient: "linear-gradient(135deg, #013728 0%, #004d40 60%, #00695c 100%)",
     status: "active"
   },
@@ -287,7 +294,7 @@ const INITIAL_BANNERS = [
     description: "Got a prescription from your doctor? Upload it here and our registered pharmacist will verify and fulfill your medicines.",
     buttonText: "Upload Prescription Now",
     buttonAction: "openRxUploadModal()",
-    imageUrl: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=500&auto=format&fit=crop&q=80",
+    imageUrl: "img/hero-2.svg",
     bgGradient: "linear-gradient(135deg, #0f172a 0%, #005641 100%)",
     status: "active"
   },
@@ -298,7 +305,7 @@ const INITIAL_BANNERS = [
     description: "Use promo code SAVE20 on orders above ₹100 for instant discount on health & wellness products.",
     buttonText: "View Promo Offers",
     buttonAction: "openCartDrawer()",
-    imageUrl: "https://images.unsplash.com/photo-1559598467-f8b76c8155d0?w=500&auto=format&fit=crop&q=80",
+    imageUrl: "img/hero-3.svg",
     bgGradient: "linear-gradient(135deg, #004d40 0%, #00897b 100%)",
     status: "active"
   }
@@ -379,13 +386,17 @@ let state = {
   activeInspectedOrderId: null,
   config: {
     dbMode: "live",
-    apiUrl: "https://script.google.com/macros/s/AKfycbzCova6urulEts5tGl1-ZdRsCIMqpHtyqI8MjDwQ2X6brif9WmV6MMXd01S6F9i_gN2/exec",
-    adminEmail: "vinaylakkakula1701@gmail.com",
-    whatsappNumber: "919876543210",
+    apiUrl: "https://script.google.com/macros/s/AKfycbxoXC9OO9AxaoE_rSAqVjSV-xHkP00w8LO3UCfB_qUrmy7X8aqVYcgpiOejEPRHZxnv2Q/exec",
+    adminEmail: "shridevimedical6@gmail.com",
+    // >>> PUBLIC STORE PROFILE: edit these 4 lines with your real details <<<
+    whatsappNumber: "919908848569",            // Customer-facing WhatsApp (country code + number, no +)
+    storeAddress: "Korutla, Jagtial District, Telangana - 505326",
+    storeHours: "Open daily 8:00 AM - 10:00 PM",
+    drugLicense: "",                           // e.g. "Drug Licence No: TS/JGL/xxxx" (shown in footer when filled)
     showFloatingCoupons: true,
     storeName: "Dhanush Medicals",
     storeTagline: "ONLINE PHARMACY WEB ORDERING",
-    logoIcon: "fa-prescription-bottle-medical",
+    logoIcon: "logo-mark.svg",
     themePreset: "emerald",
     emailAlertsEnabled: true
   }
@@ -452,9 +463,9 @@ function loadStateFromStorage() {
 
   // Ensure default Live API URL and Admin Email are configured
   state.config.dbMode = "live";
-  state.config.apiUrl = "https://script.google.com/macros/s/AKfycbzCova6urulEts5tGl1-ZdRsCIMqpHtyqI8MjDwQ2X6brif9WmV6MMXd01S6F9i_gN2/exec";
+  state.config.apiUrl = APPS_SCRIPT_URL;
   if (!state.config.adminEmail || state.config.adminEmail === "admin@pharmacy-express.com") {
-    state.config.adminEmail = "vinaylakkakula1701@gmail.com";
+    state.config.adminEmail = "shridevimedical6@gmail.com";
   }
 
   try {
@@ -486,6 +497,13 @@ function loadStateFromStorage() {
     if (savedBanners) {
       const parsed = JSON.parse(savedBanners);
       state.banners = (Array.isArray(parsed) && parsed.length > 0) ? parsed : INITIAL_BANNERS;
+      // Upgrade old default banners (stock photos) to the new illustrated artwork
+      state.banners.forEach(b => {
+        const m = /^banner-([123])$/.exec(b.id || "");
+        if (m && typeof b.imageUrl === "string" && b.imageUrl.indexOf("images.unsplash.com") !== -1) {
+          b.imageUrl = "img/hero-" + m[1] + ".svg";
+        }
+      });
     } else {
       state.banners = INITIAL_BANNERS;
     }
@@ -563,8 +581,10 @@ function updateBrandUI() {
   // Dynamic Brand Icon / Logo Image
   const brandIconContainer = document.querySelector(".brand-logo .brand-icon");
   if (brandIconContainer) {
-    if (logoInput.startsWith("http://") || logoInput.startsWith("https://") || logoInput.startsWith("data:")) {
-      brandIconContainer.innerHTML = `<img src="${logoInput}" style="width:30px; height:30px; object-fit:contain;" alt="Pharmacy Logo">`;
+    // The old default icon is upgraded to the new Dhanush logo automatically
+    const effectiveLogo = (logoInput === "fa-prescription-bottle-medical" || logoInput === "logo-mark.svg") ? LOGO_MARK_URI : logoInput;
+    if (/^(https?:|data:|\.\/|img\/)/.test(effectiveLogo) || /\.(svg|png|jpe?g|webp)$/i.test(effectiveLogo)) {
+      brandIconContainer.innerHTML = `<img src="${effectiveLogo}" alt="${storeName} logo">`;
     } else {
       const iconClass = logoInput.startsWith("fa-") ? logoInput : ("fa-" + logoInput);
       brandIconContainer.innerHTML = `<i class="fa-solid ${iconClass}"></i>`;
@@ -572,6 +592,23 @@ function updateBrandUI() {
   }
 
   applyThemePreset(themePreset);
+  updateFooterUI(storeName);
+}
+
+// Footer / public contact details
+function updateFooterUI(storeName) {
+  const setText = (id, v) => { const el = document.getElementById(id); if (el) el.innerText = v; };
+  setText("footerStoreName", storeName);
+  const fl = document.querySelector(".dm-footer-logo"); if (fl) fl.src = LOGO_FULL_URI;
+  setText("footerYear", new Date().getFullYear());
+  if (state.config.storeAddress) setText("footerAddress", state.config.storeAddress);
+  if (state.config.storeHours) setText("footerHours", state.config.storeHours);
+  const licRow = document.getElementById("footerLicenseRow");
+  if (licRow) {
+    const lic = (state.config.drugLicense || "").trim();
+    licRow.style.display = lic ? "flex" : "none";
+    setText("footerLicense", lic);
+  }
 }
 
 function applyThemePreset(themeKey) {
@@ -1253,13 +1290,13 @@ function handleDirectRxSubmit(e) {
 // Helper to trigger Admin Email Notification
 async function triggerAdminOrderEmailAlert(orderObj, isTestMode = false) {
   const emailInput = document.getElementById("adminConfigEmailInput");
-  const targetEmail = (emailInput && emailInput.value.trim()) ? emailInput.value.trim() : (state.config.adminEmail || "vinaylakkakula1701@gmail.com");
+  const targetEmail = (emailInput && emailInput.value.trim()) ? emailInput.value.trim() : (state.config.adminEmail || "shridevimedical6@gmail.com");
   const storeName = state.config.storeName || "Dhanush Medicals";
 
   if (isTestMode) {
-    showToast(`Firing test email alert to ${targetEmail}...`, "success");
+    showToast(`Sending test alert (email + WhatsApp)...`, "success");
   } else {
-    showToast(`🎉 Order #${orderObj.id} Placed Successfully! Processing express delivery.`, "success");
+    showToast(`🎉 Order #${orderObj.id} placed! The pharmacy has been notified by email & WhatsApp.`, "success");
   }
 
   if (state.config.dbMode === "live" && state.config.apiUrl) {
@@ -1277,7 +1314,7 @@ async function triggerAdminOrderEmailAlert(orderObj, isTestMode = false) {
         body: payload
       });
       if (isTestMode) {
-        showToast(`📧 Live Email Alert Dispatched to ${targetEmail}!`, "success");
+        showToast(`📧📱 Test alert sent (email to ${targetEmail} + WhatsApp to admin)!`, "success");
       }
     } catch (err) {
       try {
@@ -1301,7 +1338,7 @@ async function triggerAdminOrderEmailAlert(orderObj, isTestMode = false) {
 
 async function sendTestAdminEmailAlert() {
   const emailInput = document.getElementById("adminConfigEmailInput");
-  const targetEmail = (emailInput && emailInput.value.trim()) ? emailInput.value.trim() : (state.config.adminEmail || "vinaylakkakula1701@gmail.com");
+  const targetEmail = (emailInput && emailInput.value.trim()) ? emailInput.value.trim() : (state.config.adminEmail || "shridevimedical6@gmail.com");
 
   if (!targetEmail) {
     showToast("Please enter an Admin Notification Email Address!", "error");
@@ -1426,7 +1463,21 @@ function openOrderTracker(orderId) {
     }
   });
 
+  const waBtn = document.getElementById("trackWhatsappBtn");
+  if (waBtn) waBtn.onclick = () => sendOrderToPharmacyWhatsApp(order.id);
+
   document.getElementById("orderTrackerModalOverlay").classList.add("active");
+}
+
+// Customer taps this to send a ready-written order summary to the pharmacy's WhatsApp
+function sendOrderToPharmacyWhatsApp(orderId) {
+  const order = state.orders.find(o => o.id === orderId);
+  if (!order) return;
+  const cleanPhone = (state.config.whatsappNumber || "").replace(/[^0-9]/g, "");
+  const storeName = state.config.storeName || "Dhanush Medicals";
+  const lines = (order.items || []).map(i => `• ${i.title} x${i.qty}`).join("\n");
+  const msg = `Hello ${storeName}, I placed order #${order.id}.\n\n${lines}\n\nTotal: ₹${Number(order.total || 0).toFixed(2)}\nName: ${order.customerName}\nPhone: ${order.phone}\nAddress: ${order.address}\nPayment: ${order.paymentMethod}`;
+  window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, "_blank");
 }
 
 function closeTrackerModal() {

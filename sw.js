@@ -1,8 +1,10 @@
-const CACHE_NAME = 'dhanush-meds-pwa-v2';
+const CACHE_NAME = 'dhanush-meds-pwa-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './styles.css',
+  './premium.css',
+  './logo-mark.svg',
   './app.js',
   './manifest.json',
   './icon-192.png',

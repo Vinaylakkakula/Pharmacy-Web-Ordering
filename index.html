@@ -3,11 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title id="docTitle">MediExpress Pharmacy - Online Medical Store & Web-Ordering</title>
-  <meta name="description" content="Buy Medicines, Health Products, Personal Care, Baby Care, Ayurveda and Health Devices online with Express Delivery & Google Apps Script Backend.">
+  <title id="docTitle">Dhanush Medicals - Online Pharmacy in Korutla | Medicines Delivered to Your Door</title>
+  <meta name="description" content="Dhanush Medicals, Korutla: order medicines, upload your doctor's prescription, and get genuine healthcare products delivered to your doorstep. Verified pharmacists, express delivery, COD & UPI.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="canonical" href="https://pharmacy-web-ordering.vercel.app/">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Dhanush Medicals - Online Pharmacy in Korutla">
+  <meta property="og:description" content="Genuine medicines, prescription upload and express doorstep delivery in Korutla.">
+  <meta property="og:image" content="https://pharmacy-web-ordering.vercel.app/icon-512.png">
   <!-- PWA Manifest & Web App Install Tags -->
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0D9488">
+  <meta name="theme-color" content="#013728">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Dhanush Meds">
@@ -16,9 +22,10 @@
   <!-- Google Fonts & FontAwesome -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="stylesheet" href="styles.css?v=20260910">
+  <link rel="stylesheet" href="premium.css?v=20261107">
   <script>
     // Force unregister old service workers and clear caches to ensure fresh files load
     if ('serviceWorker' in navigator) {
@@ -52,8 +59,8 @@
       <button id="pwaInstallTopBtn" class="pwa-install-top-btn" onclick="triggerPWAInstall()" style="display:inline-flex;">
         <i class="fa-solid fa-cloud-arrow-down"></i> Install App
       </button>
-      <a href="javascript:void(0)" onclick="openSettingsModal(event)"><i class="fa-solid fa-sliders"></i> App & Store Settings</a>
-      <a href="javascript:void(0)" onclick="openLoginModal(event)"><i class="fa-solid fa-user-shield"></i> Staff Portal</a>
+      <a href="#dmContact"><i class="fa-solid fa-location-dot"></i> Visit Us</a>
+      <a href="javascript:void(0)" onclick="openWhatsAppOrder()"><i class="fa-brands fa-whatsapp"></i> WhatsApp Order</a>
     </div>
   </div>
 
@@ -64,10 +71,10 @@
       <!-- Dynamic Editable Brand Logo -->
       <a href="javascript:void(0)" class="brand-logo" onclick="switchView('storefront')">
         <div class="brand-icon">
-          <i class="fa-solid fa-prescription-bottle-medical"></i>
+          <img src="logo-mark.svg" alt="Dhanush Medicals logo">
         </div>
         <div class="brand-title">
-          <span id="headerBrandName" class="main-name">MediExpress</span>
+          <span id="headerBrandName" class="main-name">Dhanush Medicals</span>
           <span id="headerBrandSub" class="sub-name">ONLINE PHARMACY WEB ORDERING</span>
         </div>
       </a>
@@ -134,7 +141,7 @@
               <i class="fa-solid fa-arrow-trend-down"></i> Explore Pharmacy Savings
             </button>
           </div>
-          <img src="https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=500&auto=format&fit=crop&q=80" alt="Medicine Savings" class="banner-img-decor">
+          <img src="img/hero-1.svg" alt="Medicines and healthcare" class="banner-img-decor">
         </div>
 
         <!-- Quick Prescription Upload Card -->
@@ -210,11 +217,11 @@
             <p>Free dosage advice</p>
           </div>
         </div>
-        <div class="service-card" onclick="openServiceInfo('Express Delivery')">
-          <div class="service-icon" style="background:#fef3c7; color:#b45309;"><i class="fa-solid fa-bolt"></i></div>
+        <div class="service-card" onclick="switchCategoryFilter('Health Devices')">
+          <div class="service-icon" style="background:#fef3c7; color:#b45309;"><i class="fa-solid fa-heart-pulse"></i></div>
           <div class="service-info">
-            <h4>Express Delivery</h4>
-            <p>Fast doorstep delivery</p>
+            <h4>Health Devices</h4>
+            <p>BP, sugar &amp; wellness monitors</p>
           </div>
         </div>
       </section>
@@ -313,6 +320,17 @@
         </div>
         <div id="medicinesGrid" class="products-grid">
           <!-- Dynamic Products -->
+        </div>
+      </section>
+
+      <!-- How it works -->
+      <section class="dm-how" id="dmHow">
+        <h3>Order medicines in 3 simple steps</h3>
+        <p>Safe, verified and delivered to your doorstep in Korutla.</p>
+        <div class="dm-steps">
+          <div class="dm-step"><div class="dm-step-num">1</div><h4>Search or upload your prescription</h4><p>Find medicines by name or salt, or upload a photo of your doctor's prescription.</p></div>
+          <div class="dm-step"><div class="dm-step-num">2</div><h4>Pharmacist verifies your order</h4><p>Our registered pharmacist checks every prescription before your order is packed.</p></div>
+          <div class="dm-step"><div class="dm-step-num">3</div><h4>Delivered to your door</h4><p>Pay by Cash on Delivery or UPI. Track your order status until it reaches you.</p></div>
         </div>
       </section>
 
@@ -602,7 +620,7 @@
             <div class="form-row">
               <div class="form-group">
                 <label>Pharmacy WhatsApp Contact Number (for WhatsApp Orders) *</label>
-                <input type="text" id="adminConfigWhatsappInput" class="form-control" placeholder="e.g. 919876543210 (Country Code + Phone)" required value="919876543210">
+                <input type="text" id="adminConfigWhatsappInput" class="form-control" placeholder="e.g. 919876543210 (Country Code + Phone)" required value="919908848569">
                 <small style="color:var(--pharmacy-text-muted);">Format: Country Code + Mobile Number (e.g. 919876543210)</small>
               </div>
               <div class="form-group">
@@ -616,7 +634,7 @@
 
             <div style="display:flex; gap:12px; margin-top:20px;">
               <button type="submit" class="btn btn-primary" style="flex:1;"><i class="fa-solid fa-save"></i> Save Pharmacy Logo, Theme & Branding Settings</button>
-              <button type="button" class="btn btn-secondary" onclick="sendTestAdminEmailAlert()" style="background:#0284c7; color:#fff; border:none;"><i class="fa-solid fa-paper-plane"></i> Send Test Email Alert</button>
+              <button type="button" class="btn btn-secondary" onclick="sendTestAdminEmailAlert()" style="background:#0284c7; color:#fff; border:none;"><i class="fa-solid fa-paper-plane"></i> Send Test Order Alert (Email + WhatsApp)</button>
             </div>
           </form>
         </div>
@@ -944,6 +962,7 @@
           <span>Total Paid</span>
           <span id="trackTotalPaid">₹0.00</span>
         </div>
+        <button id="trackWhatsappBtn" class="dm-wa-order-btn" type="button"><i class="fa-brands fa-whatsapp"></i> Send this order to the pharmacy on WhatsApp</button>
       </div>
       <div class="modal-footer">
         <button class="btn btn-primary" onclick="closeTrackerModal()">Close Tracker</button>
@@ -1390,6 +1409,55 @@
       </div>
     </div>
   </div>
+
+  <!-- Site Footer -->
+  <footer class="dm-footer" id="dmContact">
+    <div class="dm-footer-inner">
+      <div>
+        <img class="dm-footer-logo" src="logo.svg" alt="Dhanush Medicals">
+        <p class="dm-blurb">Your trusted neighbourhood pharmacy in Korutla, now online. Genuine medicines, verified by registered pharmacists and delivered to your doorstep.</p>
+        <a class="dm-wa-btn" href="javascript:void(0)" onclick="openWhatsAppOrder()"><i class="fa-brands fa-whatsapp"></i> Order on WhatsApp</a>
+      </div>
+      <div>
+        <h5>Shop</h5>
+        <ul>
+          <li><a onclick="switchCategoryFilter('Prescription Medicines')">Prescription Medicines</a></li>
+          <li><a onclick="switchCategoryFilter('Personal Care')">Personal Care</a></li>
+          <li><a onclick="switchCategoryFilter('Baby Care')">Baby Care</a></li>
+          <li><a onclick="switchCategoryFilter('Ayurveda')">Ayurveda</a></li>
+          <li><a onclick="switchCategoryFilter('Health Devices')">Health Devices</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Help</h5>
+        <ul>
+          <li><a onclick="openRxUploadModal()">Upload Prescription</a></li>
+          <li><a onclick="openServiceInfo('Pharmacist Consultation')">Ask a Pharmacist</a></li>
+          <li><a onclick="openServiceInfo('Express Delivery')">Delivery Information</a></li>
+          <li><a onclick="openCartDrawer()">My Cart</a></li>
+        </ul>
+      </div>
+      <div>
+        <h5>Visit &amp; Contact</h5>
+        <ul class="dm-contact">
+          <li><i class="fa-solid fa-location-dot"></i><span id="footerAddress">Korutla, Jagtial District, Telangana - 505326</span></li>
+          <li><i class="fa-brands fa-whatsapp"></i><a id="footerWhatsapp" href="javascript:void(0)" onclick="openWhatsAppOrder()">Chat on WhatsApp</a></li>
+          <li><i class="fa-regular fa-clock"></i><span id="footerHours">Open daily 8:00 AM - 10:00 PM</span></li>
+          <li id="footerLicenseRow" style="display:none;"><i class="fa-solid fa-certificate"></i><span id="footerLicense"></span></li>
+        </ul>
+      </div>
+    </div>
+    <div class="dm-compliance">Prescription medicines are dispensed only against a valid prescription from a registered medical practitioner. Information on this website is for general guidance and is not a substitute for professional medical advice. Please consult your doctor or pharmacist before use.</div>
+    <div class="dm-footer-bottom">
+      <span>&copy; <span id="footerYear">2026</span> <span id="footerStoreName">Dhanush Medicals</span>. All rights reserved.</span>
+      <span>
+        <a href="javascript:void(0)" onclick="openLoginModal(event)">Staff Login</a>
+        <a href="javascript:void(0)" onclick="openSettingsModal(event)">Store Settings</a>
+      </span>
+    </div>
+  </footer>
+
+  <a class="dm-wa-fab" href="javascript:void(0)" onclick="openWhatsAppOrder()" title="Order on WhatsApp" aria-label="Order on WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
 
   <!-- Mobile Bottom Navigation Bar -->
   <nav class="mobile-bottom-nav">
