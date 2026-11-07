@@ -269,7 +269,7 @@ const INITIAL_COUPONS = [
 ];
 
 // >>> PASTE YOUR GOOGLE APPS SCRIPT WEB APP URL HERE (Deploy > Manage deployments > Web app URL, ends with /exec) <<<
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxoXC9OO9AxaoE_rSAqVjSV-xHkP00w8LO3UCfB_qUrmy7X8aqVYcgpiOejEPRHZxnv2Q/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzVFsN3YVnSqhpnmhqRvnuHH0t5Rsx1lrdRgeD_ERHFfhISjxWUN-Uq9FKqPdlcmgiGVA/exec";
 
 // Built-in logo (embedded so it always displays, even if the image files are missing)
 const LOGO_MARK_URI = "data:image/svg+xml;charset=utf-8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Dhanush Medicals logo"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#14a38f"/><stop offset="0.55" stop-color="#047857"/><stop offset="1" stop-color="#013728"/></linearGradient><linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd25a"/><stop offset="1" stop-color="#f59e0b"/></linearGradient></defs><rect width="64" height="64" rx="16" fill="url(#g)"/><!-- Bow (Dhanush) --><path d="M33 9 C12 17 12 47 33 55" fill="none" stroke="url(#gold)" stroke-width="4.2" stroke-linecap="round"/><!-- Bow string = vertical bar of the medical cross --><rect x="29.5" y="12" width="7" height="40" rx="3.5" fill="#fff"/><!-- Arrow shaft = horizontal bar of the medical cross --><rect x="17" y="28.5" width="33" height="7" rx="3.5" fill="#fff"/><!-- Arrow head --><path d="M47 21.5 L58.5 32 L47 42.5 Z" fill="url(#gold)"/></svg>');
@@ -386,7 +386,7 @@ let state = {
   activeInspectedOrderId: null,
   config: {
     dbMode: "live",
-    apiUrl: "https://script.google.com/macros/s/AKfycbxoXC9OO9AxaoE_rSAqVjSV-xHkP00w8LO3UCfB_qUrmy7X8aqVYcgpiOejEPRHZxnv2Q/exec",
+    apiUrl: "https://script.google.com/macros/s/AKfycbzVFsN3YVnSqhpnmhqRvnuHH0t5Rsx1lrdRgeD_ERHFfhISjxWUN-Uq9FKqPdlcmgiGVA/exec",
     adminEmail: "shridevimedical6@gmail.com",
     // >>> PUBLIC STORE PROFILE: edit these 4 lines with your real details <<<
     whatsappNumber: "919908848569",            // Customer-facing WhatsApp (country code + number, no +)
@@ -494,8 +494,8 @@ function loadStateFromStorage() {
     if (savedConfig) {
       try {
         const parsed = JSON.parse(savedConfig);
-        // Migrate away from old Apps Script URL or old email if cached in localStorage
-        if (parsed.apiUrl && (parsed.apiUrl.includes("AKfycbzCova6urulEts5tGl1-ZdRsCIMqpHtyqI8MjDwQ2X6brif9WmV6MMXd01S6F9i_gN2") || !parsed.apiUrl)) {
+        // Automatically migrate to the active Apps Script deployment
+        if (!parsed.apiUrl || parsed.apiUrl !== APPS_SCRIPT_URL) {
           parsed.apiUrl = APPS_SCRIPT_URL;
         }
         if (parsed.adminEmail === "vinaylakkakula1701@gmail.com" || parsed.adminEmail === "admin@pharmacy-express.com" || !parsed.adminEmail) {
@@ -508,9 +508,7 @@ function loadStateFromStorage() {
 
   // Ensure default Live API URL and Admin Email are configured to the active deployment
   state.config.dbMode = "live";
-  if (!state.config.apiUrl || state.config.apiUrl.includes("AKfycbzCova6urulEts5tGl1-ZdRsCIMqpHtyqI8MjDwQ2X6brif9WmV6MMXd01S6F9i_gN2")) {
-    state.config.apiUrl = APPS_SCRIPT_URL;
-  }
+  state.config.apiUrl = APPS_SCRIPT_URL;
   if (!state.config.adminEmail || state.config.adminEmail === "admin@pharmacy-express.com" || state.config.adminEmail === "vinaylakkakula1701@gmail.com") {
     state.config.adminEmail = "shridevimedical6@gmail.com";
   }
