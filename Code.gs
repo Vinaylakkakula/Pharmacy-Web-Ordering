@@ -1,12 +1,55 @@
 /**
  * Pharmacy Web Ordering System - Google Apps Script Backend (Code.gs)
  * Handles Google Sheets CRUD database operations, Google Drive image/Rx uploading,
- * and AUTOMATED EMAIL NOTIFICATIONS to Admin upon every customer order.
+ * and AUTOMATED EMAIL + WHATSAPP NOTIFICATIONS to Admin upon every customer order.
+ *
+ * ADMIN EMAIL(S): add Script Property  ADMIN_EMAILS = first@gmail.com, second@gmail.com
+ *   (all addresses get every new-order email; no website change needed)
+ *
+ * WHATSAPP SETUP (Project Settings > Script Properties):
+ *   Option A - CallMeBot (free, 2-minute setup, good for a single admin phone)
+ *     WA_PROVIDER   = callmebot
+ *     WA_ADMIN_PHONE= +919XXXXXXXXX        (admin phone, international format)
+ *     WA_API_KEY    = <key the CallMeBot bot sends you on WhatsApp>
+ *   Option B - Official WhatsApp Business Cloud API (Meta) - most reliable for a live store
+ *     WA_PROVIDER      = meta
+ *     WA_ADMIN_PHONE   = 919XXXXXXXXX      (digits only)
+ *     WA_META_TOKEN    = <permanent access token>
+ *     WA_META_PHONE_ID = <WhatsApp phone number ID>
+ *     WA_META_TEMPLATE = new_order_alert   (approved template with 5 body variables:
+ *                         {{1}} order id, {{2}} customer, {{3}} total, {{4}} phone, {{5}} items)
+ *     WA_META_LANG     = en                (optional, template language code)
+ *   Then run testWhatsAppAlert() once from the editor to authorise and test.
  */
 
 function doGet(e) {
-  return ContentService.createTextOutput("Pharmacy Web-Ordering Backend API is running successfully!\nDeploy as Web App and set access to 'Anyone'.")
-    .setMimeType(ContentService.MimeType.TEXT);
+  // Open the Web App URL in a browser to see this status page (no secrets are shown).
+  const props = PropertiesService.getScriptProperties();
+  const emails = props.getProperty("ADMIN_EMAILS") || "(not set - using email sent by the website)";
+  const wa = (props.getProperty("WA_PROVIDER") && props.getProperty("WA_ADMIN_PHONE"))
+    ? ("configured (" + props.getProperty("WA_PROVIDER") + ")") : "NOT configured";
+  return ContentService.createTextOutput(
+    "Pharmacy Web-Ordering Backend API is running successfully! (backend v3)\n" +
+    "Admin email(s): " + emails + "\n" +
+    "WhatsApp alerts: " + wa + "\n" +
+    "Script owner account: " + Session.getEffectiveUser().getEmail()
+  ).setMimeType(ContentService.MimeType.TEXT);
+}
+
+/**
+ * Run this from the Apps Script editor (Run > testEmailAlert) to test the email alone.
+ * The first run asks for permission to send email: click Review permissions > Allow.
+ */
+function testEmailAlert() {
+  const to = PropertiesService.getScriptProperties().getProperty("ADMIN_EMAILS") ||
+    Session.getEffectiveUser().getEmail();
+  sendAdminOrderEmailNotification({
+    id: "TEST-" + Math.floor(1000 + Math.random() * 9000),
+    customerName: "Test Customer", phone: "9876543210", address: "Korutla, Telangana 505326",
+    paymentMethod: "Cash on Delivery", rxRequired: false, total: 70,
+    items: [{ title: "Dolo 650mg Tablets", qty: 2, price: 35 }]
+  }, to, "Dhanush Medicals");
+  Logger.log("Test email sent to " + to);
 }
 
 function doPost(e) {
@@ -76,6 +119,16 @@ function doPost(e) {
         break;
 
       case "saveOrder":
+        // 0. If a prescription arrived as a base64 data-URL, store it in Drive and keep only the link
+        try {
+          if (data && typeof data.rxUrl === "string" && data.rxUrl.indexOf("data:") === 0) {
+            data.rxUrl = uploadFileToDrive(data.rxUrl, data.rxFileName || ("rx-" + data.id), "Pharmacy Direct Uploads");
+          }
+        } catch (errRx) {
+          Logger.log("Rx upload warning: " + errRx.toString());
+          data.rxUrl = "";
+        }
+
         // 1. Try saving order to Sheets (if bound to spreadsheet)
         try {
           result.data = saveRowData("Orders", data);
@@ -85,9 +138,15 @@ function doPost(e) {
         result.success = true;
 
         // 2. Trigger AUTOMATED EMAIL ALERT to Admin (ALWAYS EXECUTES!)
-        const targetAdminEmail = requestData.adminEmail || "vinaylakkakula1701@gmail.com";
+        // Admin email(s): Script Property ADMIN_EMAILS wins (comma-separated list allowed),
+        // then the email sent by the website, then the default below.
+        const targetAdminEmail = PropertiesService.getScriptProperties().getProperty("ADMIN_EMAILS") ||
+          requestData.adminEmail || "shridevimedical6@gmail.com";
         const storeName = requestData.storeName || "Dhanush Medicals";
         sendAdminOrderEmailNotification(data, targetAdminEmail, storeName);
+
+        // 3. Trigger AUTOMATED WHATSAPP ALERT to Admin (independent of email; never blocks the order)
+        sendAdminWhatsAppNotification(data, storeName);
         break;
 
       case "updateOrderStatus":
@@ -105,7 +164,7 @@ function doPost(e) {
       default:
         result.success = true;
         result.message = "Action received";
-        const fallbackEmail = requestData.adminEmail || "vinaylakkakula1701@gmail.com";
+        const fallbackEmail = requestData.adminEmail || "shridevimedical6@gmail.com";
         sendAdminOrderEmailNotification(data || { id: "TEST-ALERT", customerName: "Customer Alert", total: 0 }, fallbackEmail, "Dhanush Medicals");
         break;
     }
@@ -198,6 +257,116 @@ function sendAdminOrderEmailNotification(order, recipientEmail, storeName) {
   } catch (e) {
     Logger.log("Email Notification Error: " + e.toString());
   }
+}
+
+
+/**
+ * Builds the plain-text WhatsApp alert for a new order.
+ */
+function buildWhatsAppOrderText(order, storeName) {
+  const items = (order.items && order.items.length > 0)
+    ? order.items.map(function(i) { return "- " + i.title + " x" + i.qty; }).join("\n")
+    : "- Prescription review order";
+  let text = "\uD83D\uDEA8 NEW ORDER #" + order.id + " - " + (storeName || "Dhanush Medicals") + "\n\n" +
+    "Customer: " + (order.customerName || "N/A") + "\n" +
+    "Phone: " + (order.phone || "N/A") + "\n" +
+    "Address: " + (order.address || "N/A") + "\n" +
+    "Payment: " + (order.paymentMethod || "Cash on Delivery") + "\n" +
+    "Rx needed: " + (order.rxRequired ? "YES - check pharmacist queue" : "No") + "\n\n" +
+    "Items:\n" + items + "\n\n" +
+    "TOTAL: Rs " + (order.total || 0);
+  if (order.rxUrl && String(order.rxUrl).indexOf("http") === 0) {
+    text += "\n\nPrescription: " + order.rxUrl;
+  }
+  return text;
+}
+
+/**
+ * Sends a WhatsApp message to the Admin for every new order.
+ * Provider + credentials come from Script Properties (see header). Failures are only logged.
+ */
+function sendAdminWhatsAppNotification(order, storeName) {
+  try {
+    const props = PropertiesService.getScriptProperties();
+    const provider = (props.getProperty("WA_PROVIDER") || "").toLowerCase();
+    const adminPhone = props.getProperty("WA_ADMIN_PHONE");
+
+    if (!provider || !adminPhone) {
+      Logger.log("WhatsApp alert skipped: WA_PROVIDER / WA_ADMIN_PHONE not set in Script Properties.");
+      return false;
+    }
+
+    if (provider === "callmebot") {
+      const apiKey = props.getProperty("WA_API_KEY");
+      if (!apiKey) { Logger.log("WhatsApp (CallMeBot) skipped: WA_API_KEY missing."); return false; }
+      const url = "https://api.callmebot.com/whatsapp.php" +
+        "?phone=" + encodeURIComponent(adminPhone) +
+        "&text=" + encodeURIComponent(buildWhatsAppOrderText(order, storeName)) +
+        "&apikey=" + encodeURIComponent(apiKey);
+      const res = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+      Logger.log("CallMeBot response " + res.getResponseCode() + ": " + res.getContentText().substring(0, 200));
+      return res.getResponseCode() === 200;
+    }
+
+    if (provider === "meta") {
+      const token = props.getProperty("WA_META_TOKEN");
+      const phoneId = props.getProperty("WA_META_PHONE_ID");
+      const template = props.getProperty("WA_META_TEMPLATE");
+      const lang = props.getProperty("WA_META_LANG") || "en";
+      if (!token || !phoneId) { Logger.log("WhatsApp (Meta) skipped: WA_META_TOKEN / WA_META_PHONE_ID missing."); return false; }
+
+      const itemsLine = (order.items && order.items.length > 0)
+        ? order.items.map(function(i) { return i.title + " x" + i.qty; }).join(", ")
+        : "Prescription review order";
+      const to = String(adminPhone).replace(/[^0-9]/g, "");
+
+      let payload;
+      if (template) {
+        // Template message: required for business-initiated alerts (works any time)
+        const vals = [order.id, order.customerName || "N/A", "Rs " + (order.total || 0), order.phone || "N/A", itemsLine];
+        payload = {
+          messaging_product: "whatsapp", to: to, type: "template",
+          template: {
+            name: template, language: { code: lang },
+            components: [{ type: "body", parameters: vals.map(function(v) { return { type: "text", text: String(v).substring(0, 500) }; }) }]
+          }
+        };
+      } else {
+        // Plain text: only delivered if the admin messaged the business number in the last 24 hours
+        payload = { messaging_product: "whatsapp", to: to, type: "text", text: { body: buildWhatsAppOrderText(order, storeName) } };
+      }
+
+      const res = UrlFetchApp.fetch("https://graph.facebook.com/v20.0/" + phoneId + "/messages", {
+        method: "post",
+        contentType: "application/json",
+        headers: { Authorization: "Bearer " + token },
+        payload: JSON.stringify(payload),
+        muteHttpExceptions: true
+      });
+      Logger.log("Meta WhatsApp response " + res.getResponseCode() + ": " + res.getContentText().substring(0, 300));
+      return res.getResponseCode() >= 200 && res.getResponseCode() < 300;
+    }
+
+    Logger.log("WhatsApp alert skipped: unknown WA_PROVIDER '" + provider + "' (use callmebot or meta).");
+    return false;
+  } catch (e) {
+    Logger.log("WhatsApp Notification Error: " + e.toString());
+    return false;
+  }
+}
+
+/**
+ * Run this once from the Apps Script editor (Run > testWhatsAppAlert).
+ * It asks you to authorise external requests and sends a sample order alert to the admin.
+ */
+function testWhatsAppAlert() {
+  const ok = sendAdminWhatsAppNotification({
+    id: "TEST-" + Math.floor(1000 + Math.random() * 9000),
+    customerName: "Test Customer", phone: "9876543210", address: "Korutla, Telangana 505326",
+    paymentMethod: "Cash on Delivery", rxRequired: true, total: 70,
+    items: [{ title: "Dolo 650mg Tablets", qty: 2, price: 35 }]
+  }, "Dhanush Medicals");
+  Logger.log("WhatsApp test " + (ok ? "SENT" : "NOT SENT - see log lines above"));
 }
 
 /**
