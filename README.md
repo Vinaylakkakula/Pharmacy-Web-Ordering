@@ -68,3 +68,13 @@ Every order (cart checkout **and** prescription upload) triggers a WhatsApp mess
 
 Credentials are stored only in Script Properties (never in the website code).
 Customers also get a **"Send this order to the pharmacy on WhatsApp"** button on their order slip.
+
+---
+
+## 🧾 Catalogue build (Nov 2026)
+
+* **255 products in 11 categories**, taken from the shop's shelf photos — see `catalog.js` (categories + products) and `img/products/` (one image per product, cropped from the photos).
+* **Prices are placeholders.** Change them in **Admin → Medicines** (or edit `price` in `catalog.js`). The *Image URL* field on each product also accepts an online image link if you want to swap a photo.
+* Rx flags (`rxRequired`) are best-guess defaults — please have the pharmacist review them.
+* **No orders are bundled.** On first load of this build every browser drops any cached orders/products/cart (controlled by `CATALOG_VERSION` in `catalog.js` — bump it when you change the catalogue).
+* ⚠️ Orders also live in the Google Sheet behind the Apps Script URL. To start with zero orders there too: **Staff Login → Admin → Orders → "Clear All Orders"** (it clears the Sheet as well), or delete the rows under the header in the `Orders` tab.

@@ -5,229 +5,7 @@
  * Dynamic Store Branding, Multi-role Auth & Dual DB Mode.
  */
 
-// Initial Seed Data
-const INITIAL_CATEGORIES = [
-  { id: "cat-1", name: "Prescription Medicines", icon: "fa-prescription", description: "Doctor prescribed prescription drugs" },
-  { id: "cat-2", name: "Personal Care", icon: "fa-pump-soap", description: "Soaps, body washes, deodorants and shampoos" },
-  { id: "cat-3", name: "Baby Care", icon: "fa-baby", description: "Baby diapers, wipes, and skincare" },
-  { id: "cat-4", name: "Ayurveda", icon: "fa-leaf", description: "Herbal medicines and natural remedies" },
-  { id: "cat-5", name: "Health Devices", icon: "fa-heart-pulse", description: "BP monitors, thermometers, glucometers" },
-  { id: "cat-6", name: "Nutritional Drinks", icon: "fa-bottle-water", description: "Protein powders, multivitamins & supplements" },
-  { id: "cat-7", name: "Home Essentials", icon: "fa-house-medical", description: "First aid, hand sanitizers, disinfectants" }
-];
-
-const INITIAL_MEDICINES = [
-  {
-    id: "med-101",
-    title: "Activated Charcoal Skin Care Soap, 250g (2x125g)",
-    brand: "Pharmacy Direct",
-    salt: "Charcoal & Vitamin E",
-    category: "Personal Care",
-    price: 99.4,
-    mrp: 177.5,
-    discount: "44% OFF",
-    stock: 120,
-    rxRequired: false,
-    dealTag: "Value Deal",
-    imageUrl: "https://images.unsplash.com/photo-1607006482172-35891d9e1158?w=400&auto=format&fit=crop&q=80",
-    description: "Deep cleansing activated charcoal soap for radiant skin."
-  },
-  {
-    id: "med-102",
-    title: "Aqua Blue Antibacterial Hand Wash, 500 ml",
-    brand: "Health Essentials",
-    salt: "Germ Protect Formula",
-    category: "Personal Care",
-    price: 99.2,
-    mrp: 160.0,
-    discount: "38% OFF",
-    stock: 85,
-    rxRequired: false,
-    dealTag: "Value Deal",
-    imageUrl: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&auto=format&fit=crop&q=80",
-    description: "Moisturizing antibacterial liquid hand wash refill."
-  },
-  {
-    id: "med-103",
-    title: "Refreshing Ocean Minerals Body Wash, 400ml",
-    brand: "Pure Care",
-    salt: "Ocean Minerals & Aloe",
-    category: "Personal Care",
-    price: 100.0,
-    mrp: 200.0,
-    discount: "50% OFF",
-    stock: 60,
-    rxRequired: false,
-    dealTag: "50% OFF",
-    imageUrl: "https://images.unsplash.com/photo-1556228720-195a672e8a03?w=400&auto=format&fit=crop&q=80",
-    description: "Invigorating shower gel for fresh all-day feel."
-  },
-  {
-    id: "med-104",
-    title: "Premium Citrus Refreshing Wet Wipes, 60 Wipes",
-    brand: "Health Essentials",
-    salt: "Citrus Extract & Glycerin",
-    category: "Personal Care",
-    price: 99.2,
-    mrp: 159.0,
-    discount: "38% OFF",
-    stock: 140,
-    rxRequired: false,
-    dealTag: "Value Deal",
-    imageUrl: "https://images.unsplash.com/photo-1608248597260-6582054b2b8a?w=400&auto=format&fit=crop&q=80",
-    description: "Soft alcohol-free cleansing facial wipes."
-  },
-  {
-    id: "med-105",
-    title: "Pure Aloe Vera Skin Care Gel, 200g",
-    brand: "Herbal Organics",
-    salt: "99% Pure Aloe Vera",
-    category: "Personal Care",
-    price: 99.2,
-    mrp: 166.0,
-    discount: "38% OFF",
-    stock: 90,
-    rxRequired: false,
-    dealTag: "Value Deal",
-    imageUrl: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=400&auto=format&fit=crop&q=80",
-    description: "Soothing natural aloe vera gel for skin hydrations."
-  },
-  {
-    id: "med-106",
-    title: "Natural Sandalwood Bath Soap, 250g (2x125g)",
-    brand: "Pharmacy Direct",
-    salt: "Pure Sandalwood Oil",
-    category: "Personal Care",
-    price: 99.4,
-    mrp: 177.5,
-    discount: "44% OFF",
-    stock: 110,
-    rxRequired: false,
-    dealTag: "Value Deal",
-    imageUrl: "https://images.unsplash.com/photo-1607006482172-35891d9e1158?w=400&auto=format&fit=crop&q=80",
-    description: "Aromatic sandalwood soap for smooth skin."
-  },
-  {
-    id: "med-107",
-    title: "Nivea Men Fresh Active Deodorant Spray, 150ml",
-    brand: "Nivea Men",
-    salt: "Ocean Extracts",
-    category: "Personal Care",
-    price: 149.0,
-    mrp: 299.0,
-    discount: "50% OFF",
-    stock: 50,
-    rxRequired: false,
-    dealTag: "50% OFF",
-    imageUrl: "https://images.unsplash.com/photo-1616949755610-8c9bbc08f138?w=400&auto=format&fit=crop&q=80",
-    description: "48-hour deodorant protection for active men."
-  },
-  {
-    id: "med-108",
-    title: "Lacto Calamine SPF 50 Sunscreen Lotion, 50g",
-    brand: "Lacto Calamine",
-    salt: "Kaolin Clay & Zinc Oxide",
-    category: "Personal Care",
-    price: 125.0,
-    mrp: 250.0,
-    discount: "50% OFF",
-    stock: 75,
-    rxRequired: false,
-    dealTag: "50% OFF",
-    imageUrl: "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=400&auto=format&fit=crop&q=80",
-    description: "Oil control matte sunscreen lotion."
-  },
-  {
-    id: "med-109",
-    title: "Dabur Red Toothpaste Paste, 200g",
-    brand: "Dabur",
-    salt: "Clove Oil & Pudina",
-    category: "Ayurveda",
-    price: 65.0,
-    mrp: 130.0,
-    discount: "50% OFF",
-    stock: 200,
-    rxRequired: false,
-    dealTag: "50% OFF",
-    imageUrl: "https://images.unsplash.com/photo-1559598467-f8b76c8155d0?w=400&auto=format&fit=crop&q=80",
-    description: "Ayurvedic toothpaste for total gum and teeth care."
-  },
-  {
-    id: "med-110",
-    title: "Little's Premium Comfort Baby Diapers - Large (60 Pants)",
-    brand: "Little's",
-    salt: "Cotton Soft Weave",
-    category: "Baby Care",
-    price: 299.0,
-    mrp: 599.0,
-    discount: "50% OFF",
-    stock: 40,
-    rxRequired: false,
-    dealTag: "50% OFF",
-    imageUrl: "https://images.unsplash.com/photo-1519689680058-324335c77eba?w=400&auto=format&fit=crop&q=80",
-    description: "Absorbent leak-proof pant style baby diapers."
-  },
-  {
-    id: "med-111",
-    title: "Dolo 650mg Paracetamol Tablets (15 Strip)",
-    brand: "Micro Labs",
-    salt: "Paracetamol 650mg",
-    category: "Prescription Medicines",
-    price: 30.5,
-    mrp: 35.0,
-    discount: "13% OFF",
-    stock: 300,
-    rxRequired: false,
-    dealTag: "Bestseller",
-    imageUrl: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&auto=format&fit=crop&q=80",
-    description: "Fever and mild to moderate pain relief tablet."
-  },
-  {
-    id: "med-112",
-    title: "Amoxicillin 500mg Antibiotic Capsules (10 Strip)",
-    brand: "Cipla",
-    salt: "Amoxicillin Trihydrate",
-    category: "Prescription Medicines",
-    price: 85.0,
-    mrp: 105.0,
-    discount: "19% OFF",
-    stock: 150,
-    rxRequired: true,
-    dealTag: "Rx Required",
-    imageUrl: "https://images.unsplash.com/photo-1471864190281-a93a3070b6de?w=400&auto=format&fit=crop&q=80",
-    description: "Broad spectrum antibiotic capsule. Doctor prescription mandatory."
-  },
-  {
-    id: "med-113",
-    title: "Omron Smart Digital Blood Pressure Monitor",
-    brand: "Omron",
-    salt: "Oscillometric Sensor",
-    category: "Health Devices",
-    price: 1890.0,
-    mrp: 2490.0,
-    discount: "24% OFF",
-    stock: 25,
-    rxRequired: false,
-    dealTag: "Top Rated",
-    imageUrl: "https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=400&auto=format&fit=crop&q=80",
-    description: "Automatic arm BP monitor with memory storage."
-  },
-  {
-    id: "med-114",
-    title: "Waterproof Rapid Digital Thermometer",
-    brand: "Health Devices",
-    salt: "Precision Microchip",
-    category: "Health Devices",
-    price: 199.0,
-    mrp: 349.0,
-    discount: "43% OFF",
-    stock: 80,
-    rxRequired: false,
-    dealTag: "Value Deal",
-    imageUrl: "https://images.unsplash.com/photo-1584036561566-baf8f5f1b144?w=400&auto=format&fit=crop&q=80",
-    description: "10-second fast fever reading digital thermometer."
-  }
-];
+// Initial seed data: INITIAL_CATEGORIES / INITIAL_MEDICINES / CATALOG_VERSION now live in catalog.js (loaded before this file)
 
 const INITIAL_USERS = [
   { username: "admin", password: "admin123", role: "admin", name: "Pharmacy Admin" },
@@ -510,6 +288,16 @@ if (typeof window !== "undefined") {
 
 // State Persistence
 function loadStateFromStorage() {
+  // One-time reset when a new catalogue build is deployed: drops stale products, categories,
+  // orders and carts cached in this browser (staff logins & store settings are kept).
+  try {
+    if (localStorage.getItem("pharmacy_app_data_version") !== CATALOG_VERSION) {
+      ["pharmacy_app_medicines", "pharmacy_app_categories", "pharmacy_app_orders", "pharmacy_app_cart"]
+        .forEach(k => localStorage.removeItem(k));
+      localStorage.setItem("pharmacy_app_data_version", CATALOG_VERSION);
+    }
+  } catch (e) { }
+
   try {
     const savedConfig = localStorage.getItem("pharmacy_app_config");
     if (savedConfig) {
@@ -928,8 +716,9 @@ function renderProducts() {
     const valueDeals = state.medicines.filter(m => m.price <= 100 || m.dealTag === "Value Deal");
     renderGrid("valueDealsGrid", valueDeals.slice(0, 6));
 
-    const fiftyPercent = state.medicines.filter(m => m.mrp > 0 && Math.round(((m.mrp - m.price) / m.mrp) * 100) >= 40);
-    renderGrid("fiftyPercentGrid", fiftyPercent.slice(0, 6));
+    const coughCold = state.medicines.filter(m => m.category === "Cough, Cold & Allergy");
+    if (secFifty) secFifty.style.display = coughCold.length ? 'block' : 'none';
+    renderGrid("fiftyPercentGrid", coughCold.slice(0, 6));
 
     const medicines = state.medicines.filter(m => m.category === "Prescription Medicines" || m.rxRequired);
     renderGrid("medicinesGrid", medicines.length > 0 ? medicines : state.medicines.slice(0, 6));
@@ -962,8 +751,9 @@ function renderApolloGrid(containerId, productList) {
     const img = med.imageUrl || 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=300';
 
     // Tag labels e.g. Pack / Diaper / Tablet
-    let packTag = 'Pack';
-    if (med.title.toLowerCase().includes('soap')) packTag = 'Soap';
+    let packTag = med.packType || 'Pack';
+    if (med.packType) { /* explicit pack type from catalogue */ }
+    else if (med.title.toLowerCase().includes('soap')) packTag = 'Soap';
     else if (med.title.toLowerCase().includes('diaper')) packTag = 'Diaper';
     else if (med.title.toLowerCase().includes('tablet')) packTag = 'Tablet';
     else if (med.title.toLowerCase().includes('wash')) packTag = 'Bottle';
