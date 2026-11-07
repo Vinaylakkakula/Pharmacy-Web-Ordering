@@ -452,8 +452,11 @@
       <div id="tabMedicinesCrud" class="admin-tab-content">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
           <h3>Manage Pharmacy Products</h3>
-          <button class="btn btn-primary" onclick="openAddMedicineModal()"><i class="fa-solid fa-plus"></i> Add New
-            Medicine</button>
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="btn btn-secondary" onclick="publishCatalogToCloud(true)" title="Send this device's full product list to the cloud so every phone/tab shows the same list"><i class="fa-solid fa-cloud-arrow-up"></i> Publish Catalogue to Cloud</button>
+            <button class="btn btn-primary" onclick="openAddMedicineModal()"><i class="fa-solid fa-plus"></i> Add New
+              Medicine</button>
+          </div>
         </div>
         <div class="table-responsive">
           <table class="custom-table">
@@ -1646,7 +1649,7 @@
 
   <!-- JavaScript -->
   <script src="catalog.js?v=20261107-cat1"></script>
-  <script src="app.js?v=20261107-8"></script>
+  <script src="app.js?v=20261107-9"></script>
 </body>
 
 </html>

@@ -33,6 +33,20 @@ function doGet(e) {
     })).setMimeType(ContentService.MimeType.JSON);
   }
 
+  // Tiny, fast check used by every device every few seconds: "did the catalogue change?"
+  if (action === "getCatalogStamp") {
+    return ContentService.createTextOutput(JSON.stringify({
+      success: true, stamp: getCatalogStamp()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  // Full catalogue (products + categories) - only fetched when the stamp changed
+  if (action === "getCatalog") {
+    return ContentService.createTextOutput(JSON.stringify({
+      success: true, data: getCatalogPayload()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+
   // Instant GET response for Store Init
   if (action === "init") {
     return ContentService.createTextOutput(JSON.stringify({
@@ -173,22 +187,51 @@ function doPost(e) {
         break;
 
       case "saveMedicine":
-        result.data = saveRowData("Medicines", data);
+        withCatalogLock(function () {
+          ensureHeaders(SpreadsheetApp.getActiveSpreadsheet().getSheetByName("Medicines"), MED_HEADERS);
+          result.data = saveRowData("Medicines", data);
+          result.stamp = bumpCatalogStamp();
+        });
         result.success = true;
         break;
 
       case "deleteMedicine":
-        deleteRowData("Medicines", data.id);
+        withCatalogLock(function () {
+          deleteRowData("Medicines", data.id);
+          result.stamp = bumpCatalogStamp();
+        });
         result.success = true;
         break;
 
       case "saveCategory":
-        result.data = saveRowData("Categories", data);
+        withCatalogLock(function () {
+          result.data = saveRowData("Categories", data);
+          result.stamp = bumpCatalogStamp();
+        });
         result.success = true;
         break;
 
       case "deleteCategory":
-        deleteRowData("Categories", data.id);
+        withCatalogLock(function () {
+          deleteRowData("Categories", data.id);
+          result.stamp = bumpCatalogStamp();
+        });
+        result.success = true;
+        break;
+
+      case "getCatalog":
+        result.data = getCatalogPayload();
+        result.stamp = result.data.stamp;
+        result.success = true;
+        break;
+
+      // Replaces the whole product + category list in ONE call (used by "Publish catalogue to cloud")
+      case "publishCatalog":
+        withCatalogLock(function () {
+          replaceSheetRows("Medicines", MED_HEADERS, (data && data.medicines) || []);
+          replaceSheetRows("Categories", CAT_HEADERS, (data && data.categories) || []);
+          result.stamp = bumpCatalogStamp();
+        });
         result.success = true;
         break;
 
@@ -468,6 +511,62 @@ function initDatabase() {
       sheet.getRange(1, 1, 1, tables[sheetName].length).setFontWeight("bold").setBackground("#e0f2f1");
     }
   }
+}
+
+// ---------------------------------------------------------------------------
+// Catalogue sync helpers (products + categories shared by every device)
+// ---------------------------------------------------------------------------
+const MED_HEADERS = ["id", "title", "brand", "salt", "category", "price", "mrp", "stock", "rxRequired", "imageUrl", "description", "packType", "dealTag"];
+const CAT_HEADERS = ["id", "name", "icon", "description"];
+
+function withCatalogLock(fn) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try { fn(); } finally { lock.releaseLock(); }
+}
+
+function getCatalogStamp() {
+  return PropertiesService.getScriptProperties().getProperty("CATALOG_STAMP") || "0";
+}
+
+function bumpCatalogStamp() {
+  const stamp = String(new Date().getTime());
+  PropertiesService.getScriptProperties().setProperty("CATALOG_STAMP", stamp);
+  return stamp;
+}
+
+function getCatalogPayload() {
+  return { stamp: getCatalogStamp(), medicines: getSheetData("Medicines"), categories: getSheetData("Categories") };
+}
+
+// Adds any missing column headers (keeps existing columns/data) and returns the header row
+function ensureHeaders(sheet, wanted) {
+  const lastCol = Math.max(sheet.getLastColumn(), 1);
+  const have = sheet.getRange(1, 1, 1, lastCol).getValues()[0].filter(function (h) { return h !== ""; });
+  let changed = false;
+  wanted.forEach(function (h) { if (have.indexOf(h) === -1) { have.push(h); changed = true; } });
+  if (changed || sheet.getLastRow() === 0) {
+    sheet.getRange(1, 1, 1, have.length).setValues([have]).setFontWeight("bold").setBackground("#e0f2f1");
+  }
+  return have;
+}
+
+// Replaces every data row of a sheet with `rows` using a single write (fast even for hundreds of rows)
+function replaceSheetRows(sheetName, wantedHeaders, rows) {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = ss.getSheetByName(sheetName);
+  if (!sheet) sheet = ss.insertSheet(sheetName);
+  const headers = ensureHeaders(sheet, wantedHeaders);
+  if (sheet.getLastRow() > 1) sheet.getRange(2, 1, sheet.getLastRow() - 1, sheet.getMaxColumns()).clearContent();
+  if (!rows.length) return;
+  const values = rows.map(function (r) {
+    return headers.map(function (h) {
+      let v = r[h] !== undefined && r[h] !== null ? r[h] : "";
+      if (typeof v === "object") v = JSON.stringify(v);
+      return v;
+    });
+  });
+  sheet.getRange(2, 1, values.length, headers.length).setValues(values);
 }
 
 function getSheetData(sheetName) {

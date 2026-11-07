@@ -203,6 +203,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loadStateFromStorage();
     updateBrandUI();
     fetchLiveStoreSettingsFromAPI();
+    startCatalogSync();
     renderHeroBanner();
     startHeroBannerAutoSlider();
     renderCategoryChips();
@@ -1528,6 +1529,7 @@ function handleStaffLogin(e) {
   renderStaffDashboard();
   switchView('dashboard');
   showToast(`Welcome ${user.name} (${user.role.toUpperCase()})`, "success");
+  if (user.role === "admin") ensureCloudCatalogPublished();
 }
 
 function logoutStaff() {
@@ -1754,9 +1756,10 @@ function handleSaveMedicine(e) {
   const imageUrl = document.getElementById("medImageUrl").value;
   const description = document.getElementById("medDesc").value;
 
-  const itemObj = { id, title, brand, category, salt, price, mrp, stock, rxRequired, imageUrl, description, dealTag: rxRequired ? "Rx Required" : "Deal" };
-
   const existingIdx = state.medicines.findIndex(m => m.id === id);
+  const prev = existingIdx > -1 ? state.medicines[existingIdx] : {};
+  const itemObj = { ...prev, id, title, brand, category, salt, price, mrp, stock, rxRequired, imageUrl, description, packType: prev.packType || "", dealTag: prev.dealTag || "" };
+
   if (existingIdx > -1) {
     state.medicines[existingIdx] = itemObj;
   } else {
@@ -1767,7 +1770,12 @@ function handleSaveMedicine(e) {
   closeMedicineModal();
   renderProducts();
   renderAdminTables();
-  showToast(`Saved product "${title}" successfully`, "success");
+  showToast(`Saved product "${title}" on this device - syncing to all devices...`, "success");
+
+  // Push to the cloud immediately (does not block the UI); other devices pick it up within seconds
+  cloudPost({ action: "saveMedicine", data: itemObj })
+    .then(r => { if (!r.stamp) throw new Error("Code.gs is not updated yet"); showToast(`☁️ "${title}" synced to all devices`, "success"); })
+    .catch(err => showToast(`Saved on this device only - cloud sync failed (${err.message})`, "error"));
 }
 
 function deleteMedicine(id) {
@@ -1776,7 +1784,10 @@ function deleteMedicine(id) {
     saveStateToStorage();
     renderProducts();
     renderAdminTables();
-    showToast("Medicine deleted", "success");
+    showToast("Medicine deleted - syncing to all devices...", "success");
+    cloudPost({ action: "deleteMedicine", data: { id } })
+      .then(r => { if (!r.stamp) throw new Error("Code.gs is not updated yet"); showToast("☁️ Deletion synced to all devices", "success"); })
+      .catch(err => showToast(`Deleted on this device only - cloud sync failed (${err.message})`, "error"));
   }
 }
 
@@ -2996,3 +3007,142 @@ document.addEventListener("DOMContentLoaded", () => {
   console.log("[PHARMACY] All event listeners wired successfully ✓");
 });
 
+
+
+// =============================================================
+// CATALOGUE CLOUD SYNC  (products + categories shared by all devices)
+//  - every save/delete is pushed to the Google Sheet straight away
+//  - every device checks a tiny "stamp" every few seconds and reloads only when it changed
+//  - other tabs in the same browser update instantly through the storage event
+// =============================================================
+let catalogPendingPushes = 0;
+let catalogPulling = false;
+const CATALOG_STAMP_KEY = "pharmacy_app_catalog_stamp";
+const CATALOG_POLL_MS = 5000;
+
+async function cloudPost(payload) {
+  const base = state.config.apiUrl || APPS_SCRIPT_URL;
+  catalogPendingPushes++;
+  try {
+    const res = await fetch(base, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+    if (!json || !json.success) throw new Error((json && json.error) || "cloud error");
+    return json;
+  } finally {
+    catalogPendingPushes--;
+  }
+}
+
+function normalizeCloudMedicine(m) {
+  return {
+    id: String(m.id),
+    title: String(m.title || ""),
+    brand: m.brand || "",
+    salt: m.salt || "",
+    category: m.category || "",
+    price: Number(m.price) || 0,
+    mrp: Number(m.mrp) || 0,
+    stock: (m.stock === "" || m.stock == null) ? 50 : Number(m.stock),
+    rxRequired: m.rxRequired === true || String(m.rxRequired).toLowerCase() === "true",
+    imageUrl: m.imageUrl || "",
+    description: m.description || "",
+    packType: m.packType || "",
+    dealTag: m.dealTag || "",
+    discount: ""
+  };
+}
+
+function refreshCatalogUI() {
+  if (state.activeCategoryFilter !== "all" && !state.categories.some(c => c.name === state.activeCategoryFilter)) {
+    state.activeCategoryFilter = "all";
+  }
+  renderCategoryChips();
+  renderProducts();
+  const modal = document.getElementById("medicineModalOverlay");
+  if (state.currentUser && !(modal && modal.classList.contains("active"))) {
+    try { renderAdminTables(); } catch (e) { }
+  }
+}
+
+async function pullCatalogFromCloud(force) {
+  if (catalogPulling || catalogPendingPushes > 0) return;
+  catalogPulling = true;
+  try {
+    const base = state.config.apiUrl || APPS_SCRIPT_URL;
+    const sep = base.includes("?") ? "&" : "?";
+    const st = await (await fetch(base + sep + "action=getCatalogStamp&_t=" + Date.now())).json();
+    if (!st || !st.success) return;
+    const remote = String(st.stamp || "0");
+    if (remote === "0") return;                         // catalogue never published to the cloud yet
+    let local = null;
+    try { local = localStorage.getItem(CATALOG_STAMP_KEY); } catch (e) { }
+    if (!force && remote === local) return;             // nothing changed
+
+    const cat = await (await fetch(base + sep + "action=getCatalog&_t=" + Date.now())).json();
+    if (!cat || !cat.success || !cat.data) return;
+    const meds = (cat.data.medicines || []).map(normalizeCloudMedicine).filter(m => m.id && m.title);
+    const cats = (cat.data.categories || []).filter(c => c.id && c.name)
+      .map(c => ({ id: String(c.id), name: String(c.name), icon: c.icon || "fa-pills", description: c.description || "" }));
+    if (!meds.length) return;                           // never blank the shop
+
+    const changed = JSON.stringify(meds) !== JSON.stringify(state.medicines) ||
+      (cats.length && JSON.stringify(cats) !== JSON.stringify(state.categories));
+    if (changed) {
+      state.medicines = meds;
+      if (cats.length) state.categories = cats;
+      saveStateToStorage();
+      refreshCatalogUI();
+    }
+    try { localStorage.setItem(CATALOG_STAMP_KEY, String(cat.data.stamp || remote)); } catch (e) { }
+  } catch (e) {
+    /* offline or backend not updated: keep showing what we have */
+  } finally {
+    catalogPulling = false;
+  }
+}
+
+function startCatalogSync() {
+  pullCatalogFromCloud(false);
+  setInterval(() => { if (document.visibilityState === "visible") pullCatalogFromCloud(false); }, CATALOG_POLL_MS);
+  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") pullCatalogFromCloud(false); });
+  window.addEventListener("focus", () => pullCatalogFromCloud(false));
+  window.addEventListener("online", () => pullCatalogFromCloud(false));
+  // Other tabs of this browser: instant
+  window.addEventListener("storage", ev => {
+    if (ev.key !== "pharmacy_app_medicines" && ev.key !== "pharmacy_app_categories") return;
+    try {
+      const m = JSON.parse(localStorage.getItem("pharmacy_app_medicines"));
+      const c = JSON.parse(localStorage.getItem("pharmacy_app_categories"));
+      if (Array.isArray(m) && m.length) state.medicines = m;
+      if (Array.isArray(c) && c.length) state.categories = c;
+      refreshCatalogUI();
+    } catch (e) { }
+  });
+}
+
+// Sends this device's full product + category list to the cloud (one call)
+async function publishCatalogToCloud(manual) {
+  if (manual && !confirm(`Publish all ${state.medicines.length} products and ${state.categories.length} categories from THIS device to the cloud?\n\nEvery phone / tab will then show exactly this list.`)) return;
+  showToast("☁️ Publishing catalogue to cloud...", "info");
+  try {
+    const r = await cloudPost({ action: "publishCatalog", data: { medicines: state.medicines, categories: state.categories } });
+    if (!r.stamp) throw new Error("Code.gs is not updated yet");
+    showToast("✅ Catalogue published. All devices update within seconds.", "success");
+  } catch (err) {
+    showToast(`Cloud publish failed (${err.message}). Update Code.gs in Apps Script and redeploy.`, "error");
+  }
+}
+
+// On admin login: if the cloud has no catalogue yet, publish this one automatically
+async function ensureCloudCatalogPublished() {
+  try {
+    const base = state.config.apiUrl || APPS_SCRIPT_URL;
+    const sep = base.includes("?") ? "&" : "?";
+    const st = await (await fetch(base + sep + "action=getCatalogStamp&_t=" + Date.now())).json();
+    if (st && st.success && String(st.stamp || "0") === "0") publishCatalogToCloud(false);
+  } catch (e) { }
+}

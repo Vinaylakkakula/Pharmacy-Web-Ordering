@@ -78,3 +78,12 @@ Customers also get a **"Send this order to the pharmacy on WhatsApp"** button on
 * Rx flags (`rxRequired`) are best-guess defaults — please have the pharmacist review them.
 * **No orders are bundled.** On first load of this build every browser drops any cached orders/products/cart (controlled by `CATALOG_VERSION` in `catalog.js` — bump it when you change the catalogue).
 * ⚠️ Orders also live in the Google Sheet behind the Apps Script URL. To start with zero orders there too: **Staff Login → Admin → Orders → "Clear All Orders"** (it clears the Sheet as well), or delete the rows under the header in the `Orders` tab.
+
+## ☁️ Live product sync (all devices)
+
+Product & category changes made in Admin are pushed to the Google Sheet immediately; every phone/tab checks for changes every 5 seconds (other tabs of the same browser update instantly).
+
+**One-time setup (required):**
+1. Open your Apps Script project → replace its code with the new `Code.gs` from this zip → **Deploy ▸ Manage deployments ▸ Edit ▸ New version ▸ Deploy** (the URL stays the same).
+2. Open the website → Staff Login → Admin. The first admin login publishes the catalogue to the cloud automatically (or press **Publish Catalogue to Cloud** on the Products tab).
+3. After that, any edit/add/delete on any device appears everywhere within a few seconds.
